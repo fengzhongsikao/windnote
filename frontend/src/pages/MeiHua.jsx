@@ -11,11 +11,9 @@ const guaNames = [
   '乾', '兑', '离', '震', '巽', '坎', '艮', '坤',
 ]
 
-const guaSymbols = ['☰', '☱', '☲', '☳', '☴', '☵', '☶', '☷']
-
 function getGuaFromNumber(n) {
   const idx = ((n - 1) % 8 + 8) % 8
-  return { name: guaNames[idx], symbol: guaSymbols[idx], index: idx }
+  return { name: guaNames[idx], index: idx }
 }
 
 function trigramIndexToBits(index) {
@@ -30,8 +28,8 @@ function linesToHexagram(lines) {
   const upperIdx = 7 - upperVal
   return {
     name: guaNames[upperIdx] + guaNames[lowerIdx],
-    upper: { name: guaNames[upperIdx], symbol: guaSymbols[upperIdx], index: upperIdx },
-    lower: { name: guaNames[lowerIdx], symbol: guaSymbols[lowerIdx], index: lowerIdx },
+    upper: { name: guaNames[upperIdx], index: upperIdx },
+    lower: { name: guaNames[lowerIdx], index: lowerIdx },
     lines: [...lines],
   }
 }
@@ -40,8 +38,8 @@ function generateMeihua(method, numberInput, manualLines, movingYao) {
   let upperNum, lowerNum
 
   if (method === 'manual') {
-    const lowerBits = manualLines[3] * 4 + manualLines[4] * 2 + manualLines[5] * 1
-    const upperBits = manualLines[0] * 4 + manualLines[1] * 2 + manualLines[2] * 1
+    const lowerBits = manualLines[2] * 4 + manualLines[1] * 2 + manualLines[0] * 1
+    const upperBits = manualLines[5] * 4 + manualLines[4] * 2 + manualLines[3] * 1
     upperNum = (7 - upperBits) + 1
     lowerNum = (7 - lowerBits) + 1
   } else if (method === 'number') {
@@ -130,7 +128,7 @@ export default function MeiHua() {
       setLoading(false)
       navigate('/meihua/detail', { state: { result: res, question } })
     }, 800)
-  }, [method, numberInput, manualLines, question, navigate])
+  }, [method, numberInput, manualLines, movingYao, question, navigate])
 
   const canSubmit = method === 'auto' || method === 'number' || method === 'manual'
 
@@ -174,8 +172,8 @@ export default function MeiHua() {
               onChange={(e) => setMovingYao(e.target.value)}
               className="!flex flex-col gap-2"
             >
-              {['初', '二', '三', '四', '五', '上'].map((label, i) => (
-                <Radio key={i} value={i + 1}>
+              {['上', '五', '四', '三', '二', '初'].map((label, i) => (
+                <Radio key={i} value={6 - i}>
                   {label}爻动
                 </Radio>
               ))}

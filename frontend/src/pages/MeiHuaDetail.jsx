@@ -6,16 +6,17 @@ import {
 import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 
-function YaoLine({ type }) {
+function YaoLine({ type, isRed }) {
   const isYang = type === 1
+  const colorClass = isRed ? 'bg-chi-400' : 'bg-hei-400'
   return (
     <div className="flex items-center justify-center">
       {isYang ? (
-        <div className="h-[10px] w-[88px] rounded-sm bg-hei-400" />
+        <div className={`h-[10px] w-[88px] rounded-sm ${colorClass}`} />
       ) : (
         <div className="flex items-center gap-[10px]">
-          <div className="h-[10px] w-[39px] rounded-sm bg-hei-400" />
-          <div className="h-[10px] w-[39px] rounded-sm bg-hei-400" />
+          <div className={`h-[10px] w-[39px] rounded-sm ${colorClass}`} />
+          <div className={`h-[10px] w-[39px] rounded-sm ${colorClass}`} />
         </div>
       )}
     </div>
@@ -42,20 +43,11 @@ function HexagramCard({ title, hexagram, highlightMoving, movingYao, isMain }) {
             const lineIndexFromBottom = lines.length - 1 - i
             const isMovingLine = hasMoving && movingYao === lineIndexFromBottom + 1
             return (
-              <div key={i} className="flex items-center justify-center gap-2">
-                <div className={isMovingLine ? 'opacity-100' : ''}>
-                  <YaoLine type={line} />
-                </div>
-                {isMovingLine && (
-                  <Tag color="error" className="!text-[10px] !h-5">动</Tag>
-                )}
+              <div key={i} className="flex items-center justify-center">
+                <YaoLine type={line} isRed={isMovingLine && isMain} />
               </div>
             )
           })}
-        </div>
-        <div className="mt-2 text-xs text-hei-400/40">
-          {hexagram.upper.symbol}{hexagram.lower.symbol}
-          <span className="ml-1">({hexagram.upper.name}{hexagram.lower.name})</span>
         </div>
       </div>
     </Card>
@@ -184,12 +176,12 @@ export default function MeiHuaDetail() {
           <div className="flex items-center justify-center gap-6 mt-4">
             <div className="flex items-center gap-2 text-sm text-hei-400/60">
               <span className="text-qing-400 font-medium">体卦</span>
-              <span>{result.upper.symbol} {result.upper.name}</span>
+              <span>{result.upper.name}</span>
             </div>
             <span className="text-hei-400/30">|</span>
             <div className="flex items-center gap-2 text-sm text-hei-400/60">
               <span className="text-chi-400 font-medium">用卦</span>
-              <span>{result.lower.symbol} {result.lower.name}</span>
+              <span>{result.lower.name}</span>
             </div>
             <span className="text-hei-400/30">|</span>
             <Tag color="error">动爻：第 {result.moving} 爻</Tag>
