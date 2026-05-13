@@ -59,7 +59,7 @@ export default function Dashboard() {
             <div className="text-center mb-4">
               <div className="text-2xl font-bold text-hei-400 mb-1">{dateStr}</div>
               <div className="text-sm text-hei-400/60">
-                  <span className="text-qing-400/70 font-medium">{ganzhi.weekday_cn}</span>
+                  <span className="text-qing-400/70 font-medium">{ganzhi?.weekday_cn}</span>
               </div>
             </div>
 
