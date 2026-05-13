@@ -55,13 +55,11 @@ const wuxiang = [
 ]
 
 function getGuaFromNumber(n) {
-  // 1-8 map to bagua
   const idx = ((n - 1) % 8 + 8) % 8
   return { name: guaNames[idx], symbol: guaSymbols[idx], index: idx }
 }
 
 function getStrokeCount(char) {
-  // Simple stroke count approximation for common characters
   const strokeMap = {
     '一': 1, '二': 2, '三': 3, '四': 5, '五': 4, '六': 4, '七': 2, '八': 2, '九': 2, '十': 2,
     '天': 4, '地': 6, '人': 2, '山': 3, '水': 4, '风': 4, '雷': 13, '火': 4, '泽': 8,
@@ -111,9 +109,6 @@ function generateMeihua(method, input, selectedWuxiang) {
   const upper = getGuaFromNumber(upperNum)
   const lower = getGuaFromNumber(lowerNum)
 
-  //互卦：取本卦的二三四爻为下互，三四五爻为上互
-  const lowerBinary = [0, 0, 0] // simplified
-  const upperBinary = [1, 1, 1] // simplified
   const huLower = getGuaFromNumber((lower.index + upper.index) % 8 + 1)
   const huUpper = getGuaFromNumber((upper.index + lower.index + 1) % 8 + 1)
 
@@ -131,14 +126,14 @@ function generateMeihua(method, input, selectedWuxiang) {
 
 function GuaDisplay({ title, upper, lower, highlight = false }) {
   return (
-    <Card className={`bg-white/5 border-white/10 ${highlight ? 'border-amber-500/30' : ''}`}>
+    <Card className={`bg-bai-400 border-hei-400/10 ${highlight ? 'border-qing-400/30' : ''}`}>
       <CardBody className="text-center">
-        <div className="text-sm text-zinc-400 mb-2">{title}</div>
+        <div className="text-sm text-hei-400/60 mb-2">{title}</div>
         <div className="text-3xl mb-2">
-          <span className="text-amber-400">{upper.symbol}</span>
-          <span className="text-amber-400">{lower.symbol}</span>
+          <span className="text-qing-400">{upper.symbol}</span>
+          <span className="text-qing-400">{lower.symbol}</span>
         </div>
-        <div className="font-bold">{upper.name}{lower.name}</div>
+        <div className="font-bold text-hei-400">{upper.name}{lower.name}</div>
       </CardBody>
     </Card>
   )
@@ -185,11 +180,11 @@ export default function MeiHua() {
   return (
     <div className="p-8 max-w-5xl mx-auto">
       <div className="flex items-center gap-2 mb-6">
-        <Flower2 size={24} className="text-amber-400" />
-        <h1 className="text-2xl font-bold">梅花易数</h1>
+        <Flower2 size={24} className="text-qing-400" />
+        <h1 className="text-2xl font-bold text-hei-400">梅花易数</h1>
       </div>
 
-      <Card className="bg-white/5 border-white/10 mb-6">
+      <Card className="bg-bai-400 border-hei-400/10 mb-6">
         <CardBody className="space-y-4">
           <Tabs
             selectedKey={method}
@@ -206,20 +201,16 @@ export default function MeiHua() {
               }
             >
               <div className="mt-4">
-                <p className="text-sm text-zinc-400 mb-4">
+                <p className="text-sm text-hei-400/60 mb-4">
                   看见什么就点什么，随心而动，以象起卦。
                 </p>
                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
                   {wuxiang.map((item) => (
                     <Button
                       key={item.name}
-                      variant={selectedWuxiang === item.name ? 'solid' : 'flat'}
+                      variant={selectedWuxiang === item.name ? 'solid' : 'light'}
                       color={selectedWuxiang === item.name ? 'warning' : 'default'}
-                      className={`h-20 flex-col gap-1 ${
-                        selectedWuxiang === item.name
-                          ? 'bg-gradient-to-br from-amber-500/20 to-red-500/20'
-                          : 'bg-white/5 hover:bg-white/10'
-                      }`}
+                      className="h-20 flex-col gap-1"
                       onPress={() => setSelectedWuxiang(item.name)}
                     >
                       <span className="text-2xl">{item.icon}</span>
@@ -239,7 +230,7 @@ export default function MeiHua() {
               }
             >
               <div className="mt-4">
-                <p className="text-sm text-zinc-400 mb-4">
+                <p className="text-sm text-hei-400/60 mb-4">
                   输入任意数字，前数为上卦，后数为下卦。
                 </p>
                 <Input
@@ -260,7 +251,7 @@ export default function MeiHua() {
               }
             >
               <div className="mt-4">
-                <p className="text-sm text-zinc-400 mb-4">
+                <p className="text-sm text-hei-400/60 mb-4">
                   输入汉字，以笔画数起卦。前字为上卦，后字为下卦。
                 </p>
                 <Textarea
@@ -275,7 +266,6 @@ export default function MeiHua() {
 
           <Button
             color="warning"
-            className="bg-gradient-to-r from-amber-500 to-red-500 max-w-xs"
             size="lg"
             onPress={handleCast}
             isLoading={loading}
@@ -288,7 +278,7 @@ export default function MeiHua() {
 
       {result && (
         <div className="space-y-6">
-          <h2 className="text-xl font-bold">排盘结果</h2>
+          <h2 className="text-xl font-bold text-hei-400">排盘结果</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <GuaDisplay
@@ -302,40 +292,40 @@ export default function MeiHua() {
               upper={{ name: '离', symbol: '☲', index: 2 }}
               lower={{ name: '兑', symbol: '☱', index: 1 }}
             />
-            <Card className="bg-white/5 border-white/10">
+            <Card className="bg-bai-400 border-hei-400/10">
               <CardBody className="text-center">
-                <div className="text-sm text-zinc-400 mb-2">动爻</div>
-                <div className="text-3xl font-bold text-red-400 mb-2">{result.moving}</div>
-                <div className="text-sm">第 {result.moving} 爻动</div>
+                <div className="text-sm text-hei-400/60 mb-2">动爻</div>
+                <div className="text-3xl font-bold text-chi-400 mb-2">{result.moving}</div>
+                <div className="text-sm text-hei-400/60">第 {result.moving} 爻动</div>
               </CardBody>
             </Card>
           </div>
 
-          <div className="flex items-center justify-center gap-4 text-zinc-400">
+          <div className="flex items-center justify-center gap-4 text-hei-400/60">
             <div className="text-center">
               <div className="text-sm mb-1">体卦</div>
-              <div className="text-xl text-amber-400">{result.upper.name}</div>
+              <div className="text-xl text-qing-400">{result.upper.name}</div>
             </div>
             <ArrowRight size={20} />
             <div className="text-center">
               <div className="text-sm mb-1">用卦</div>
-              <div className="text-xl text-amber-400">{result.lower.name}</div>
+              <div className="text-xl text-qing-400">{result.lower.name}</div>
             </div>
           </div>
 
-          <Card className="bg-white/5 border-white/10">
+          <Card className="bg-bai-400 border-hei-400/10">
             <CardBody>
               <div className="flex items-center gap-2 mb-4">
-                <Sparkles size={18} className="text-amber-400" />
-                <h3 className="font-bold">AI 解析</h3>
+                <Sparkles size={18} className="text-qing-400" />
+                <h3 className="font-bold text-hei-400">AI 解析</h3>
               </div>
               {aiLoading ? (
-                <div className="flex items-center gap-2 text-zinc-400">
+                <div className="flex items-center gap-2 text-hei-400/60">
                   <Spinner size="sm" />
                   <span>正在解析卦象...</span>
                 </div>
               ) : (
-                <div className="whitespace-pre-wrap text-zinc-300 leading-relaxed">
+                <div className="whitespace-pre-wrap text-hei-400/70 leading-relaxed">
                   {aiResponse}
                 </div>
               )}

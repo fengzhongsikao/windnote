@@ -11,7 +11,7 @@ const root = createRoot(container)
 root.render(
   <React.StrictMode>
     <HeroUIProvider>
-      <BrowserRouter>
+      <BrowserRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
         <App />
       </BrowserRouter>
     </HeroUIProvider>

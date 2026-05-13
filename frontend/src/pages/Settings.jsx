@@ -9,7 +9,7 @@ import {
   Button,
   Input,
 } from '@heroui/react'
-import { Server, Bell, MapPin, Trash2 } from 'lucide-react'
+import { Server, Bell, Trash2 } from 'lucide-react'
 
 const aiModels = [
   { key: 'openai', label: 'OpenAI GPT-4' },
@@ -21,15 +21,14 @@ const aiModels = [
 export default function SettingsPage() {
   return (
     <div className="p-8 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">设置</h1>
+      <h1 className="text-2xl font-bold text-hei-400 mb-6">设置</h1>
 
       <div className="space-y-6">
-        {/* AI Model Settings */}
-        <Card className="bg-white/5 border-white/10">
+        <Card className="bg-bai-400 border-hei-400/10">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
-              <Server size={18} className="text-amber-400" />
-              <span className="font-medium">AI 模型</span>
+              <Server size={18} className="text-qing-400" />
+              <span className="font-medium text-hei-400">AI 模型</span>
             </div>
           </CardHeader>
           <CardBody className="space-y-4">
@@ -56,60 +55,38 @@ export default function SettingsPage() {
           </CardBody>
         </Card>
 
-        {/* Location Settings */}
-        <Card className="bg-white/5 border-white/10">
+        <Card className="bg-bai-400 border-hei-400/10">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
-              <MapPin size={18} className="text-amber-400" />
-              <span className="font-medium">地理位置</span>
-            </div>
-          </CardHeader>
-          <CardBody>
-            <Input
-              label="当前城市"
-              defaultValue="广东中山"
-              className="max-w-md"
-            />
-            <p className="text-xs text-zinc-500 mt-2">
-              用于计算财神方位和黄历信息
-            </p>
-          </CardBody>
-        </Card>
-
-        {/* Notification Settings */}
-        <Card className="bg-white/5 border-white/10">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <Bell size={18} className="text-amber-400" />
-              <span className="font-medium">通知</span>
+              <Bell size={18} className="text-qing-400" />
+              <span className="font-medium text-hei-400">通知</span>
             </div>
           </CardHeader>
           <CardBody className="space-y-4">
             <div className="flex items-center justify-between">
-              <span>每日运势提醒</span>
+              <span className="text-hei-400">每日运势提醒</span>
               <Switch defaultSelected />
             </div>
-            <Divider className="bg-white/5" />
+            <Divider className="bg-hei-400/10" />
             <div className="flex items-center justify-between">
-              <span>占卜结果保存提示</span>
+              <span className="text-hei-400">占卜结果保存提示</span>
               <Switch defaultSelected />
             </div>
           </CardBody>
         </Card>
 
-        {/* Data Management */}
-        <Card className="bg-white/5 border-white/10">
+        <Card className="bg-bai-400 border-hei-400/10">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
-              <Trash2 size={18} className="text-red-400" />
-              <span className="font-medium">数据管理</span>
+              <Trash2 size={18} className="text-chi-400" />
+              <span className="font-medium text-hei-400">数据管理</span>
             </div>
           </CardHeader>
           <CardBody className="space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-medium">清除所有历史记录</div>
-                <div className="text-sm text-zinc-400">此操作不可撤销</div>
+                <div className="font-medium text-hei-400">清除所有历史记录</div>
+                <div className="text-sm text-hei-400/60">此操作不可撤销</div>
               </div>
               <Button color="danger" variant="flat">
                 清除

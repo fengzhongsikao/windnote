@@ -1,92 +1,136 @@
+import { useState, useEffect } from 'react'
 import {
   Card,
   CardBody,
   CardHeader,
   Button,
-  Chip,
-  Divider,
-  ScrollShadow,
 } from '@heroui/react'
 import {
   Sparkles,
   Calendar,
-  Compass,
-  Clock,
-  ChevronRight,
-  History,
+  Sun,
+  Moon,
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 
-const recentReadings = [
-  { id: 1, type: '六爻', question: '问事业发展', date: '今日', gua: '乾为天' },
-  { id: 2, type: '梅花', question: '问感情姻缘', date: '昨日', gua: '泽山咸' },
-  { id: 3, type: '六爻', question: '问财运投资', date: '3天前', gua: '水火既济' },
-]
+const zodiacIcons = {
+  '鼠': '🐭', '牛': '🐮', '虎': '🐯', '兔': '🐰',
+  '龙': '🐲', '蛇': '🐍', '马': '🐴', '羊': '🐑',
+  '猴': '🐵', '鸡': '🐔', '狗': '🐶', '猪': '🐷',
+}
 
 export default function Dashboard() {
   const navigate = useNavigate()
   const today = new Date()
   const dateStr = `${today.getFullYear()}年${today.getMonth() + 1}月${today.getDate()}日`
-  const weekday = ['日', '一', '二', '三', '四', '五', '六'][today.getDay()]
+
+  const [ganzhi, setGanzhi] = useState(null)
+
+  useEffect(() => {
+    axios.get('/api/lunartime')
+      .then(res => {
+        setGanzhi(res.data)
+      })
+      .catch(() => {
+        setGanzhi(null)
+      })
+  }, [])
 
   return (
     <div className="p-8 max-w-6xl mx-auto">
-      {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-400 to-red-400 bg-clip-text text-transparent mb-2">
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-qing-400 to-chi-400 bg-clip-text text-transparent mb-2">
           风筮
         </h1>
-        <p className="text-zinc-400">心诚则灵，遇事不决问东风</p>
+        <p className="text-hei-400/60">心诚则灵，遇事不决问东风</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Today's Almanac */}
-        <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
+        <Card className="bg-bai-400 border-hei-400/10 overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-qing-400 via-huang-400 to-chi-400" />
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
-              <Calendar size={18} className="text-amber-400" />
-              <span className="text-sm font-medium text-zinc-300">今日黄历</span>
+              <Calendar size={18} className="text-qing-400" />
+              <span className="text-sm font-medium text-hei-400/70">今日黄历</span>
             </div>
           </CardHeader>
           <CardBody>
-            <div className="text-2xl font-bold mb-1">{dateStr}</div>
-            <div className="text-sm text-zinc-400 mb-4">星期{weekday}</div>
-            <div className="flex gap-2 flex-wrap">
-              <Chip size="sm" color="success" variant="flat">宜：祭祀 祈福</Chip>
-              <Chip size="sm" color="danger" variant="flat">忌：动土 嫁娶</Chip>
+            <div className="text-center mb-4">
+              <div className="text-2xl font-bold text-hei-400 mb-1">{dateStr}</div>
+              <div className="text-sm text-hei-400/60">
+                  <span className="text-qing-400/70 font-medium">{ganzhi.weekday_cn}</span>
+              </div>
             </div>
+
+            <div className="border-t border-hei-400/10 pt-4" />
+
+            {ganzhi && (
+              <div className="space-y-4">
+                <div className="bg-gradient-to-br from-qing-400/10 to-bai-500 rounded-lg px-4 py-3 text-center border border-qing-400/20">
+                  <div className="text-xs text-hei-400/50 mb-1 tracking-widest">农 历</div>
+                  <div className="text-lg font-bold text-hei-400 tracking-wide">
+                    {ganzhi.lunar_year_cn}年
+                    {ganzhi.is_leap_month ? '闰' : ''}
+                    {ganzhi.lunar_month_cn}
+                    {ganzhi.lunar_day_cn}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="text-center rounded-lg bg-hei-400/5 px-2 py-2">
+                    <div className="text-[10px] text-hei-400/40 mb-1">年干支</div>
+                    <div className="text-sm font-bold text-chi-400/80">{ganzhi.ganzhi_year}</div>
+                  </div>
+                  <div className="text-center rounded-lg bg-hei-400/5 px-2 py-2">
+                    <div className="text-[10px] text-hei-400/40 mb-1">月干支</div>
+                    <div className="text-sm font-bold text-hei-400/70">{ganzhi.ganzhi_month}</div>
+                  </div>
+                  <div className="text-center rounded-lg bg-hei-400/5 px-2 py-2">
+                    <div className="text-[10px] text-hei-400/40 mb-1">日干支</div>
+                    <div className="text-sm font-bold text-hei-400/70">{ganzhi.ganzhi_day}</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-center gap-3 pt-1">
+                  <div className="flex items-center gap-1.5 text-sm text-hei-400/60">
+                    <Sun size={14} className="text-huang-500" />
+                    <span>{ganzhi.ganzhi_year}年</span>
+                  </div>
+                  <span className="text-hei-400/20">·</span>
+                  <div className="flex items-center gap-1.5 text-sm text-hei-400/60">
+                    <Moon size={14} className="text-qing-400" />
+                    <span>{ganzhi.lunar_month_cn}</span>
+                  </div>
+                  <span className="text-hei-400/20">·</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-base">{zodiacIcons[ganzhi.zodiac] || '🏮'}</span>
+                    <span className="text-sm font-medium text-chi-400/80">
+                      {ganzhi.zodiac}年
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {!ganzhi && (
+              <div className="text-center py-4 text-sm text-hei-400/40">
+                加载中...
+              </div>
+            )}
           </CardBody>
         </Card>
 
-        {/* Fortune Direction */}
-        <Card className="bg-white/5 border-white/10 backdrop-blur-sm">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <Compass size={18} className="text-amber-400" />
-              <span className="text-sm font-medium text-zinc-300">财神方位</span>
-            </div>
-          </CardHeader>
-          <CardBody>
-            <div className="text-3xl font-bold text-amber-400 mb-1">东南</div>
-            <div className="text-sm text-zinc-400 mb-2">广东中山</div>
-            <div className="text-xs text-zinc-500">
-              喜神：正南 · 福神：正东 · 阳贵：东北
-            </div>
-          </CardBody>
-        </Card>
-
-        {/* Quick Start */}
-        <Card className="bg-gradient-to-br from-amber-500/10 to-red-500/10 border-amber-500/20 backdrop-blur-sm">
+        <Card className="bg-gradient-to-br from-qing-500/10 to-chi-400/10 border-qing-400/20">
           <CardBody className="flex flex-col justify-center items-center text-center py-8">
-            <Sparkles size={32} className="text-amber-400 mb-3" />
-            <h3 className="text-lg font-bold mb-2">立即起卦</h3>
-            <p className="text-sm text-zinc-400 mb-4">心有所疑，卦象自知</p>
+            <Sparkles size={32} className="text-qing-400 mb-3" />
+            <h3 className="text-lg font-bold text-hei-400 mb-2">立即起卦</h3>
+            <p className="text-sm text-hei-400/60 mb-4">心有所疑，卦象自知</p>
             <div className="flex gap-3">
               <Button
                 color="warning"
                 variant="solid"
                 onPress={() => navigate('/liuyao')}
-                className="bg-gradient-to-r from-amber-500 to-red-500"
               >
                 六爻起卦
               </Button>
@@ -100,45 +144,6 @@ export default function Dashboard() {
             </div>
           </CardBody>
         </Card>
-      </div>
-
-      <Divider className="my-8 bg-white/5" />
-
-      {/* Recent Readings */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <History size={18} className="text-zinc-400" />
-            <h2 className="text-lg font-bold">最近占卜</h2>
-          </div>
-          <Button variant="light" size="sm" className="text-zinc-400">
-            查看全部 <ChevronRight size={14} />
-          </Button>
-        </div>
-
-        <ScrollShadow orientation="horizontal" className="w-full">
-          <div className="flex gap-4 pb-2">
-            {recentReadings.map((reading) => (
-              <Card
-                key={reading.id}
-                className="min-w-[280px] bg-white/5 border-white/10 hover:border-amber-500/30 transition-colors cursor-pointer"
-                isPressable
-                onPress={() => navigate('/liuyao')}
-              >
-                <CardBody>
-                  <div className="flex items-center justify-between mb-2">
-                    <Chip size="sm" color={reading.type === '六爻' ? 'warning' : 'secondary'} variant="flat">
-                      {reading.type}
-                    </Chip>
-                    <span className="text-xs text-zinc-500">{reading.date}</span>
-                  </div>
-                  <div className="font-bold mb-1">{reading.question}</div>
-                  <div className="text-sm text-zinc-400">{reading.gua}</div>
-                </CardBody>
-              </Card>
-            ))}
-          </div>
-        </ScrollShadow>
       </div>
     </div>
   )
