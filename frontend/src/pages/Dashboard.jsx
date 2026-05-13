@@ -1,16 +1,11 @@
 import { useState, useEffect } from 'react'
+import { Card, Button } from 'antd'
 import {
-  Card,
-  CardBody,
-  CardHeader,
-  Button,
-} from '@heroui/react'
-import {
-  Sparkles,
-  Calendar,
-  Sun,
-  Moon,
-} from 'lucide-react'
+  ThunderboltOutlined,
+  CalendarOutlined,
+  SunOutlined,
+  MoonOutlined,
+} from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
@@ -47,15 +42,16 @@ export default function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="bg-bai-400 border-hei-400/10 overflow-hidden">
+        <Card
+          className="bg-bai-400 border-hei-400/10 overflow-hidden"
+          styles={{ body: { padding: 0 } }}
+        >
           <div className="h-1 bg-gradient-to-r from-qing-400 via-huang-400 to-chi-400" />
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <Calendar size={18} className="text-qing-400" />
+          <div className="p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <CalendarOutlined className="text-qing-400" />
               <span className="text-sm font-medium text-hei-400/70">今日黄历</span>
             </div>
-          </CardHeader>
-          <CardBody>
             <div className="text-center mb-4">
               <div className="text-2xl font-bold text-hei-400 mb-1">{dateStr}</div>
               <div className="text-sm text-hei-400/60">
@@ -94,12 +90,12 @@ export default function Dashboard() {
 
                 <div className="flex items-center justify-center gap-3 pt-1">
                   <div className="flex items-center gap-1.5 text-sm text-hei-400/60">
-                    <Sun size={14} className="text-huang-500" />
+                    <SunOutlined className="text-huang-500" />
                     <span>{ganzhi.ganzhi_year}年</span>
                   </div>
                   <span className="text-hei-400/20">·</span>
                   <div className="flex items-center gap-1.5 text-sm text-hei-400/60">
-                    <Moon size={14} className="text-qing-400" />
+                    <MoonOutlined className="text-qing-400" />
                     <span>{ganzhi.lunar_month_cn}</span>
                   </div>
                   <span className="text-hei-400/20">·</span>
@@ -118,31 +114,28 @@ export default function Dashboard() {
                 加载中...
               </div>
             )}
-          </CardBody>
+          </div>
         </Card>
 
         <Card className="bg-gradient-to-br from-qing-500/10 to-chi-400/10 border-qing-400/20">
-          <CardBody className="flex flex-col justify-center items-center text-center py-8">
-            <Sparkles size={32} className="text-qing-400 mb-3" />
+          <div className="flex flex-col justify-center items-center text-center py-8">
+            <ThunderboltOutlined className="text-2xl text-qing-400 mb-3" />
             <h3 className="text-lg font-bold text-hei-400 mb-2">立即起卦</h3>
             <p className="text-sm text-hei-400/60 mb-4">心有所疑，卦象自知</p>
             <div className="flex gap-3">
               <Button
-                color="warning"
-                variant="solid"
-                onPress={() => navigate('/liuyao')}
+                type="primary"
+                onClick={() => navigate('/liuyao')}
               >
                 六爻起卦
               </Button>
               <Button
-                color="default"
-                variant="bordered"
-                onPress={() => navigate('/meihua')}
+                onClick={() => navigate('/meihua')}
               >
                 梅花易数
               </Button>
             </div>
-          </CardBody>
+          </div>
         </Card>
       </div>
     </div>

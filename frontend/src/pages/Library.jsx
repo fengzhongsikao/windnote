@@ -1,14 +1,5 @@
-import {
-  Card,
-  CardBody,
-  Input,
-  Tabs,
-  Tab,
-  Chip,
-  Accordion,
-  AccordionItem,
-} from '@heroui/react'
-import { Search, BookOpen } from 'lucide-react'
+import { Card, Input, Tabs, Tag, Collapse } from 'antd'
+import { SearchOutlined, BookOutlined } from '@ant-design/icons'
 import { useState } from 'react'
 
 const guaData = [
@@ -144,10 +135,62 @@ export default function Library() {
       g.meaning.includes(search)
   )
 
+  const tabItems = [
+    {
+      key: 'all',
+      label: '全部',
+      children: (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          {filtered.map((gua) => (
+            <Card
+              key={gua.number}
+              className="bg-bai-400 border-hei-400/10 hover:border-qing-400/30 transition-colors"
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <div className="text-lg font-bold text-hei-400">{gua.name}</div>
+                  <div className="text-2xl my-1">{gua.symbol}</div>
+                </div>
+                <Tag color="warning">第 {gua.number} 卦</Tag>
+              </div>
+              <p className="text-sm text-hei-400/60 mb-3">{gua.meaning}</p>
+              <Collapse
+                ghost
+                items={[
+                  {
+                    key: 'yao',
+                    label: '查看爻辞',
+                    children: (
+                      <div className="space-y-1 text-sm text-hei-400/60">
+                        {gua.yao.map((y, i) => (
+                          <p key={i}>{y}</p>
+                        ))}
+                      </div>
+                    ),
+                  },
+                ]}
+              />
+            </Card>
+          ))}
+        </div>
+      ),
+    },
+    {
+      key: 'upper',
+      label: '上经',
+      children: <div className="text-hei-400/60 mt-4">上经三十卦，展示前十六卦</div>,
+    },
+    {
+      key: 'lower',
+      label: '下经',
+      children: <div className="text-hei-400/60 mt-4">下经三十四卦</div>,
+    },
+  ]
+
   return (
     <div className="p-8 max-w-5xl mx-auto">
       <div className="flex items-center gap-2 mb-6">
-        <BookOpen size={24} className="text-qing-400" />
+        <BookOutlined className="text-lg text-qing-400" />
         <h1 className="text-2xl font-bold text-hei-400">解卦库</h1>
       </div>
 
@@ -155,55 +198,12 @@ export default function Library() {
         placeholder="搜索卦名、卦象或含义..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        startContent={<Search size={18} className="text-hei-400/40" />}
-        className="mb-6 max-w-md"
+        prefix={<SearchOutlined className="text-hei-400/40" />}
+        style={{ maxWidth: 384 }}
+        className="mb-6"
       />
 
-      <Tabs aria-label="Gua categories">
-        <Tab key="all" title="全部">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            {filtered.map((gua) => (
-              <Card
-                key={gua.number}
-                className="bg-bai-400 border-hei-400/10 hover:border-qing-400/30 transition-colors"
-              >
-                <CardBody>
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <div className="text-lg font-bold text-hei-400">{gua.name}</div>
-                      <div className="text-2xl my-1">{gua.symbol}</div>
-                    </div>
-                    <Chip size="sm" variant="flat" color="warning">
-                      第 {gua.number} 卦
-                    </Chip>
-                  </div>
-                  <p className="text-sm text-hei-400/60 mb-3">{gua.meaning}</p>
-                  <Accordion className="px-0">
-                    <AccordionItem
-                      key="yao"
-                      aria-label="爻辞"
-                      title="查看爻辞"
-                      className="text-sm"
-                    >
-                      <div className="space-y-1 text-sm text-hei-400/60">
-                        {gua.yao.map((y, i) => (
-                          <p key={i}>{y}</p>
-                        ))}
-                      </div>
-                    </AccordionItem>
-                  </Accordion>
-                </CardBody>
-              </Card>
-            ))}
-          </div>
-        </Tab>
-        <Tab key="upper" title="上经">
-          <div className="text-hei-400/60 mt-4">上经三十卦，展示前十六卦</div>
-        </Tab>
-        <Tab key="lower" title="下经">
-          <div className="text-hei-400/60 mt-4">下经三十四卦</div>
-        </Tab>
-      </Tabs>
+      <Tabs items={tabItems} />
     </div>
   )
 }
