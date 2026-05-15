@@ -1,4 +1,4 @@
-import { Card, Button, Input, Select, Tabs, Radio } from 'antd'
+import { Card, Button, Input, Select, Tabs, Radio, InputNumber, Checkbox } from 'antd'
 import {
   DashboardOutlined,
   SlidersOutlined,
@@ -7,111 +7,48 @@ import { useState, useCallback } from 'react'
 import YaoDisplay from '../components/YaoDisplay'
 import { useNavigate } from 'react-router-dom'
 
-const guaNames = [
-  '乾', '兑', '离', '震', '巽', '坎', '艮', '坤',
-]
-
-function getGuaFromNumber(n) {
-  const idx = ((n - 1) % 8 + 8) % 8
-  return { name: guaNames[idx], index: idx }
-}
-
-function trigramIndexToBits(index) {
-  const val = 7 - index
-  return [(val >> 2) & 1, (val >> 1) & 1, val & 1]
-}
-
-function linesToHexagram(lines) {
-  const lowerVal = lines[2] * 4 + lines[1] * 2 + lines[0] * 1
-  const upperVal = lines[5] * 4 + lines[4] * 2 + lines[3] * 1
-  const lowerIdx = 7 - lowerVal
-  const upperIdx = 7 - upperVal
-  return {
-    name: guaNames[upperIdx] + guaNames[lowerIdx],
-    upper: { name: guaNames[upperIdx], index: upperIdx },
-    lower: { name: guaNames[lowerIdx], index: lowerIdx },
-    lines: [...lines],
-  }
-}
-
-function generateMeihua(method, numberInput, manualLines, movingYao) {
-  let upperNum, lowerNum
+function generateMeihua(method, numberInput, manualLines, movingYao, movingWithShichen) {
+  let upperNum, lowerNum, moving
 
   if (method === 'manual') {
-    const lowerBits = manualLines[2] * 4 + manualLines[1] * 2 + manualLines[0] * 1
-    const upperBits = manualLines[5] * 4 + manualLines[4] * 2 + manualLines[3] * 1
-    upperNum = (7 - upperBits) + 1
-    lowerNum = (7 - lowerBits) + 1
+    const lowerBits = manualLines[0] * 4 + manualLines[1] * 2 + manualLines[2] * 1
+    const upperBits = manualLines[3] * 4 + manualLines[4] * 2 + manualLines[5] * 1
+    upperNum = 8 - upperBits
+    lowerNum = 8 - lowerBits
+    moving = movingYao
   } else if (method === 'number') {
-    const nums = numberInput.split('').filter(c => /\d/.test(c)).map(Number)
-    if (nums.length >= 2) {
-      upperNum = nums[0] || 1
-      lowerNum = nums[1] || 1
-    } else {
-      const seed = parseInt(numberInput) || Date.now()
-      upperNum = (seed % 8) + 1
-      lowerNum = ((seed >> 3) % 8) + 1
+    const str = String(numberInput ?? '')
+    const nums = str.split('').filter(c => /\d/.test(c)).map(Number)
+    const upperRemainder = nums[0] % 8
+    upperNum = upperRemainder === 0 ? 8 : upperRemainder
+    const lowerRemainder = nums[1] % 8
+    lowerNum = lowerRemainder === 0 ? 8 : lowerRemainder
+    let movingRemainder = nums[2] % 6
+    moving = movingRemainder === 0 ? 6 : movingRemainder
+    if (movingWithShichen) {
+      const hour = new Date().getHours()
+      const shichenIndex = Math.floor(((hour + 1) % 24) / 2)
+      moving = ((moving - 1 + shichenIndex) % 6) + 1
     }
   } else {
-    const seed = Date.now()
-    upperNum = (seed % 8) + 1
-    lowerNum = ((seed >> 4) % 8) + 1
+    const randUpper = Math.floor(Math.random() * 8) + 1
+    const randLower = Math.floor(Math.random() * 8) + 1
+    upperNum = randUpper
+    lowerNum = randLower
+    moving = Math.floor(Math.random() * 6) + 1
   }
 
-  const upper = getGuaFromNumber(upperNum)
-  const lower = getGuaFromNumber(lowerNum)
-
-  const upperBits = trigramIndexToBits(upper.index)
-  const lowerBits = trigramIndexToBits(lower.index)
-
-  const lines = [
-    lowerBits[2], lowerBits[1], lowerBits[0],
-    upperBits[2], upperBits[1], upperBits[0],
-  ]
-
-  const mainGua = linesToHexagram(lines)
-
-  const huLowerBits = [lines[1], lines[2], lines[3]]
-  const huUpperBits = [lines[2], lines[3], lines[4]]
-  const huGuaLines = [...huLowerBits, ...huUpperBits]
-  const huGua = linesToHexagram(huGuaLines)
-
-  const moving = method === 'manual' ? movingYao : ((upperNum + lowerNum) % 6) + 1
-
-  const changeLines = [...lines]
-  changeLines[moving - 1] = changeLines[moving - 1] === 1 ? 0 : 1
-  const changeGua = linesToHexagram(changeLines)
-
-  const cuoLines = lines.map(l => (l === 1 ? 0 : 1))
-  const cuoGua = linesToHexagram(cuoLines)
-
-  const zongLines = [...lines].reverse()
-  const zongGua = linesToHexagram(zongLines)
-
-  return {
-    upper: mainGua.upper,
-    lower: mainGua.lower,
-    mainGua: mainGua.name,
-    mainLines: lines,
-    huGua: huGua.name,
-    huGuaData: huGua,
-    changeGua,
-    cuoGua,
-    zongGua,
-    moving,
-    method,
-  }
+  return { upperNum, lowerNum, moving }
 }
 
 export default function MeiHua() {
   const navigate = useNavigate()
   const [method, setMethod] = useState('manual')
-  const [numberInput, setNumberInput] = useState('')
+  const [numberValue, setNumberValue] = useState('')
   const [question, setQuestion] = useState('')
   const [manualLines, setManualLines] = useState(Array(6).fill(0))
   const [movingYao, setMovingYao] = useState(1)
-  const [loading, setLoading] = useState(false)
-
+  const [movingWithShichen, setMovingWithShichen] = useState(false)
   const handleLineChange = useCallback((index, value) => {
     setManualLines(prev => {
       const next = [...prev]
@@ -121,14 +58,18 @@ export default function MeiHua() {
   }, [])
 
   const handleCast = useCallback(() => {
-    setLoading(true)
-
-    setTimeout(() => {
-      const res = generateMeihua(method, numberInput, method === 'manual' ? manualLines : null, movingYao)
-      setLoading(false)
-      navigate('/meihua/detail', { state: { result: res, question } })
-    }, 800)
-  }, [method, numberInput, manualLines, movingYao, question, navigate])
+    const res = generateMeihua(method, numberValue, method === 'manual' ? manualLines : null, movingYao, movingWithShichen)
+    console.log(res);
+    return
+    navigate('/meihua/detail', {
+      state: {
+        upperNum: res.upperNum,
+        lowerNum: res.lowerNum,
+        manualLines: method === 'manual' ? manualLines : null,
+        movingYao: res.moving,
+      },
+    })
+  }, [method, numberValue, manualLines, movingYao, movingWithShichen, navigate])
 
   const canSubmit = method === 'auto' || method === 'number' || method === 'manual'
 
@@ -188,14 +129,21 @@ export default function MeiHua() {
       children: (
         <div className="mt-4">
           <p className="text-sm text-hei-400/60 mb-4">
-            输入任意数字，前数为上卦，后数为下卦。
+            起卦算法: 第一数÷8 所得余数为上卦,第二数÷8 所得余数为下卦,第三数÷6所得余数为动爻。
           </p>
-          <Input
-            placeholder="输入数字，如：123"
-            value={numberInput}
-            onChange={(e) => setNumberInput(e.target.value)}
-            style={{ maxWidth: 384 }}
-          />
+          <div className="flex items-center gap-4">
+            <InputNumber
+              placeholder="请输入一个三位的数字"
+              value={numberValue}
+              min={100}
+              max={999}
+              onChange={(val) => setNumberValue(val)}
+              style={{ width: '30%' }}
+            />
+            <Checkbox checked={movingWithShichen} onChange={(e) => setMovingWithShichen(e.target.checked)}>
+              动爻加时辰
+            </Checkbox>
+          </div>
         </div>
       ),
     },
@@ -205,12 +153,12 @@ export default function MeiHua() {
       children: (
         <div className="mt-4">
           <p className="text-sm text-hei-400/60 mb-4">
-            以当前时间为种子自动生成卦象，心诚则灵。
+            假尔泰假尔泰筮假尔泰筮有常,XX今以XX事,未知可否,则以爰质所疑于神于灵，吉凶得失，悔吝忧虞，惟尔有神，尚明告之。
           </p>
           <div className="bg-hei-400/5 rounded-lg p-6 text-center">
             <DashboardOutlined className="text-2xl text-qing-400 mx-auto mb-3 block" />
             <p className="text-hei-400/70">点击下方「开始排盘」按钮</p>
-            <p className="text-sm text-hei-400/50 mt-1">系统将根据当前时间自动起卦</p>
+            <p className="text-sm text-hei-400/50 mt-1">系统将根随机自动起卦</p>
           </div>
         </div>
       ),
@@ -244,11 +192,10 @@ export default function MeiHua() {
             type="primary"
             size="large"
             onClick={handleCast}
-            loading={loading}
             disabled={!canSubmit}
             className="!w-full"
           >
-            {loading ? '排盘中...' : '开始排盘'}
+            开始排盘
           </Button>
         </div>
       </Card>

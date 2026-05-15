@@ -1,10 +1,36 @@
-import { Card, Button, Tag, Spin } from 'antd'
+import { Card, Button, Tag } from 'antd'
 import {
   DashboardOutlined,
   ArrowLeftOutlined,
 } from '@ant-design/icons'
-import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+
+const guaNames = [
+  '乾', '兑', '离', '震', '巽', '坎', '艮', '坤',
+]
+
+function getGuaFromNumber(n) {
+  const idx = ((n - 1) % 8 + 8) % 8
+  return { name: guaNames[idx], index: idx }
+}
+
+function trigramIndexToBits(index) {
+  const val = 7 - index
+  return [(val >> 2) & 1, (val >> 1) & 1, val & 1]
+}
+
+function linesToHexagram(lines) {
+  const lowerVal = lines[2] * 4 + lines[1] * 2 + lines[0] * 1
+  const upperVal = lines[5] * 4 + lines[4] * 2 + lines[3] * 1
+  const lowerIdx = 7 - lowerVal
+  const upperIdx = 7 - upperVal
+  return {
+    name: guaNames[upperIdx] + guaNames[lowerIdx],
+    upper: { name: guaNames[upperIdx], index: upperIdx },
+    lower: { name: guaNames[lowerIdx], index: lowerIdx },
+    lines: [...lines],
+  }
+}
 
 function YaoLine({ type, isRed }) {
   const isYang = type === 1
@@ -54,45 +80,12 @@ function HexagramCard({ title, hexagram, highlightMoving, movingYao, isMain }) {
   )
 }
 
-function generateAiResponse(result) {
-  const methodLabel = result.method === 'manual' ? '手动指定' : result.method === 'number' ? '数字起卦' : '自动起卦'
-  return `【梅花易数解析】
-
-您以「${methodLabel}」起卦，得「${result.mainGua}」之卦。
-
-体卦：${result.upper.name}卦
-用卦：${result.lower.name}卦
-本卦：${result.mainGua}
-互卦：${result.huGua}
-变卦：${result.changeGua.name}
-错卦：${result.cuoGua.name}
-综卦：${result.zongGua.name}
-动爻：第 ${result.moving} 爻
-
-梅花易数重在外应与即时之象。结合您当前的心境与所问之事，此卦象暗示事物正处于转变之际。建议顺应自然，不宜强求。
-
-体用分析：体卦${result.upper.name}代表您自身，用卦${result.lower.name}代表所问之事。体用生克关系决定吉凶成败。`
-}
-
 export default function MeiHuaDetail() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { result, question } = location.state || {}
+  const { upperNum, lowerNum, movingYao, methodName } = location.state || {}
 
-  const [aiResponse, setAiResponse] = useState('')
-  const [aiLoading, setAiLoading] = useState(true)
-
-  useEffect(() => {
-    if (!result) return
-    setAiLoading(true)
-    const timer = setTimeout(() => {
-      setAiResponse(generateAiResponse(result))
-      setAiLoading(false)
-    }, 1500)
-    return () => clearTimeout(timer)
-  }, [result])
-
-  if (!result) {
+  if (!upperNum || !lowerNum) {
     return (
       <div className="p-8 max-w-5xl mx-auto">
         <div className="flex items-center gap-2 mb-6">
@@ -115,6 +108,34 @@ export default function MeiHuaDetail() {
     )
   }
 
+  const upper = getGuaFromNumber(upperNum)
+  const lower = getGuaFromNumber(lowerNum)
+
+  const upperBits = trigramIndexToBits(upper.index)
+  const lowerBits = trigramIndexToBits(lower.index)
+
+  const lines = [
+    lowerBits[2], lowerBits[1], lowerBits[0],
+    upperBits[2], upperBits[1], upperBits[0],
+  ]
+
+  const mainGua = linesToHexagram(lines)
+
+  const huLowerBits = [lines[1], lines[2], lines[3]]
+  const huUpperBits = [lines[2], lines[3], lines[4]]
+  const huGuaLines = [...huLowerBits, ...huUpperBits]
+  const huGua = linesToHexagram(huGuaLines)
+
+  const changeLines = [...lines]
+  changeLines[movingYao - 1] = changeLines[movingYao - 1] === 1 ? 0 : 1
+  const changeGua = linesToHexagram(changeLines)
+
+  const cuoLines = lines.map(l => (l === 1 ? 0 : 1))
+  const cuoGua = linesToHexagram(cuoLines)
+
+  const zongLines = [...lines].reverse()
+  const zongGua = linesToHexagram(zongLines)
+
   return (
     <div className="p-8 max-w-5xl mx-auto">
       <div className="flex items-center gap-2 mb-6">
@@ -128,15 +149,6 @@ export default function MeiHuaDetail() {
       </div>
 
       <div className="space-y-6">
-        {question && (
-          <Card className="bg-bai-400 border-hei-400/10">
-            <div>
-              <span className="text-sm text-hei-400/60">所问之事</span>
-              <p className="text-hei-400 font-medium mt-1">{question}</p>
-            </div>
-          </Card>
-        )}
-
         <div>
           <h2 className="text-xl font-bold text-hei-400 mb-4">排盘结果</h2>
 
@@ -144,66 +156,51 @@ export default function MeiHuaDetail() {
             <HexagramCard
               title="本卦"
               hexagram={{
-                name: result.mainGua,
-                lines: result.mainLines,
-                upper: result.upper,
-                lower: result.lower,
+                name: mainGua.name,
+                lines: mainGua.lines,
+                upper: mainGua.upper,
+                lower: mainGua.lower,
               }}
               highlightMoving
-              movingYao={result.moving}
+              movingYao={movingYao}
               isMain
             />
             <HexagramCard
               title="互卦"
-              hexagram={result.huGuaData}
+              hexagram={huGua}
             />
             <HexagramCard
               title="变卦"
-              hexagram={result.changeGua}
+              hexagram={changeGua}
               highlightMoving
-              movingYao={result.moving}
+              movingYao={movingYao}
             />
             <HexagramCard
               title="错卦"
-              hexagram={result.cuoGua}
+              hexagram={cuoGua}
             />
             <HexagramCard
               title="综卦"
-              hexagram={result.zongGua}
+              hexagram={zongGua}
             />
           </div>
 
           <div className="flex items-center justify-center gap-6 mt-4">
             <div className="flex items-center gap-2 text-sm text-hei-400/60">
               <span className="text-qing-400 font-medium">体卦</span>
-              <span>{result.upper.name}</span>
+              <span>{mainGua.upper.name}</span>
             </div>
             <span className="text-hei-400/30">|</span>
             <div className="flex items-center gap-2 text-sm text-hei-400/60">
               <span className="text-chi-400 font-medium">用卦</span>
-              <span>{result.lower.name}</span>
+              <span>{mainGua.lower.name}</span>
             </div>
             <span className="text-hei-400/30">|</span>
-            <Tag color="error">动爻：第 {result.moving} 爻</Tag>
+            <Tag color="error">动爻：第 {movingYao} 爻</Tag>
+            <span className="text-hei-400/30">|</span>
+            <Tag color="processing">{methodName}</Tag>
           </div>
         </div>
-
-        <Card className="bg-bai-400 border-hei-400/10">
-          <div className="flex items-center gap-2 mb-4">
-            <DashboardOutlined className="text-qing-400" />
-            <h3 className="font-bold text-hei-400">AI 解析</h3>
-          </div>
-          {aiLoading ? (
-            <div className="flex items-center gap-2 text-hei-400/60">
-              <Spin size="small" />
-              <span>正在解析卦象...</span>
-            </div>
-          ) : (
-            <div className="whitespace-pre-wrap text-hei-400/70 leading-relaxed">
-              {aiResponse}
-            </div>
-          )}
-        </Card>
       </div>
     </div>
   )
