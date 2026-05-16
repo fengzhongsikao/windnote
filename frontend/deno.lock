@@ -16,7 +16,8 @@
     "npm:react-router-dom@^6.30.3": "6.30.3_react@18.3.1_react-dom@18.3.1__react@18.3.1",
     "npm:react@^18.2.0": "18.3.1",
     "npm:tailwindcss@^3.4.19": "3.4.19",
-    "npm:vite@^5.4.21": "5.4.21"
+    "npm:vite@^5.4.21": "5.4.21",
+    "npm:zustand@^5.0.13": "5.0.13_@types+react@18.3.28_react@18.3.1"
   },
   "npm": {
     "@alloc/quick-lru@5.2.0": {
@@ -1852,6 +1853,17 @@
     },
     "yallist@3.1.1": {
       "integrity": "sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g=="
+    },
+    "zustand@5.0.13_@types+react@18.3.28_react@18.3.1": {
+      "integrity": "sha512-efI2tVaVQPqtOh114loML/Z80Y4NP3yc+Ff0fYiZJPauNeWZeIp/bRFD7I9bfmCOYBh/PHxlglQ9+wvlwnPikQ==",
+      "dependencies": [
+        "@types/react",
+        "react"
+      ],
+      "optionalPeers": [
+        "@types/react",
+        "react"
+      ]
     }
   },
   "workspace": {
@@ -1872,7 +1884,8 @@
         "npm:react-router-dom@^6.30.3",
         "npm:react@^18.2.0",
         "npm:tailwindcss@^3.4.19",
-        "npm:vite@^5.4.21"
+        "npm:vite@^5.4.21",
+        "npm:zustand@^5.0.13"
       ]
     }
   }

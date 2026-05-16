@@ -37,9 +37,9 @@ function Sidebar() {
   }
 
   return (
-    <div className="fixed left-0 top-0 w-20 h-screen flex flex-col items-center py-6 bg-bai-400 border-r border-hei-400/10 z-50">
-      <nav className="flex-1 flex flex-col gap-2 w-full px-2 items-center">
-        <div className="text-xl font-bold text-qing-400 mb-2">
+    <div style={{ position: 'fixed', left: 0, top: 0, width: 80, height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 0', backgroundColor: 'white', zIndex: 50, borderRight: '1px solid rgba(46, 46, 51, 0.1)' }}>
+      <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, width: '100%', padding: '0 8px', alignItems: 'center' }}>
+        <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, color: '#7bc3db' }}>
           风
         </div>
         {navItems.map((item) => {
@@ -51,7 +51,7 @@ function Sidebar() {
                 type={isActive ? 'primary' : 'text'}
                 icon={<Icon />}
                 onClick={() => navigate(item.path)}
-                className="!w-full"
+                style={{ width: '100%' }}
                 size="large"
               />
             </Tooltip>
@@ -59,12 +59,12 @@ function Sidebar() {
         })}
       </nav>
 
-      <Divider className="!my-4 !bg-hei-400/10 !w-12" />
+      <Divider style={{ margin: '16px 0', width: 48, borderColor: 'rgba(46, 46, 51, 0.1)' }} />
 
-      <div className="w-full px-2">
+      <div style={{ width: '100%', padding: '0 8px' }}>
         <Button
           type="text"
-          className="!w-full"
+          style={{ width: '100%' }}
           onClick={toggleTheme}
           icon={isDark ? <SunOutlined /> : <MoonOutlined />}
         />
@@ -75,10 +75,10 @@ function Sidebar() {
 
 function App() {
   return (
-    <div className="flex h-full bg-white">
+    <div style={{ display: 'flex', height: '100%', backgroundColor: 'white' }}>
       <Sidebar />
       
-      <main className="flex-1 ml-20 overflow-auto relative">
+      <main style={{ flex: 1, marginLeft: 80, overflow: 'auto', position: 'relative' }}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/liuyao" element={<LiuYao />} />

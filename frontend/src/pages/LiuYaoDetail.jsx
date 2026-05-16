@@ -1,55 +1,160 @@
-import { Card, Button, Tag, Modal, Divider } from 'antd'
+import { Card, Button, Typography, Flex, Divider } from 'antd'
 import {
   ThunderboltOutlined,
   ArrowLeftOutlined,
 } from '@ant-design/icons'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import YaoDisplay from '../components/YaoDisplay'
+import { guaMap, liuyaoGuaNames, guaPalaceInfo } from '../values/guaMap'
+import { LIU_SHI_SI_GUA } from '../values/liushisi-gua'
+import useLunarStore from '../stores/lunarStore'
+import guoxueData from '../assets/guoxue.json'
 
-function GuaLine({ line, index, onClick }) {
-  const isYang = line === 1 || line === 3
-  const isMoving = line === 0 || line === 1
+function reconstructHexagram({ upperGua, lowerGua, movingDetails }) {
+  const upperBinary = upperGua === 8 ? 0 : 8 - upperGua
+  const lowerBinary = lowerGua === 8 ? 0 : 8 - lowerGua
 
-  return (
-    <div
-      className="flex items-center justify-center py-2 cursor-pointer transition-all hover:scale-105"
-      onClick={onClick}
-    >
-      <div className="flex items-center gap-3">
-        <span className="text-xs text-hei-400/40 w-8 text-right">{['初', '二', '三', '四', '五', '上'][index]}爻</span>
-        {isYang ? (
-          <div className={`h-3 w-24 rounded-full ${isMoving ? 'bg-gradient-to-r from-chi-400 to-chi-400 shadow-lg shadow-chi-400/30' : 'bg-hei-400'}`} />
-        ) : (
-          <div className="flex gap-2">
-            <div className={`h-3 w-10 rounded-full ${isMoving ? 'bg-gradient-to-r from-chi-400 to-chi-400 shadow-lg shadow-chi-400/30' : 'bg-hei-400'}`} />
-            <div className={`h-3 w-10 rounded-full ${isMoving ? 'bg-gradient-to-r from-chi-400 to-chi-400 shadow-lg shadow-chi-400/30' : 'bg-hei-400'}`} />
-          </div>
-        )}
-        {isMoving && (
-          <Tag color="error" className="!text-xs">动</Tag>
-        )}
-      </div>
-    </div>
-  )
+  const rawTypes = [
+    (lowerBinary & 4) ? 1 : 0,
+    (lowerBinary & 2) ? 1 : 0,
+    (lowerBinary & 1) ? 1 : 0,
+    (upperBinary & 4) ? 1 : 0,
+    (upperBinary & 2) ? 1 : 0,
+    (upperBinary & 1) ? 1 : 0,
+  ]
+
+  for (const { position, type } of movingDetails) {
+    rawTypes[position - 1] = type
+  }
+
+  const mainLines = rawTypes.map(t => ({
+    type: t,
+    isMoving: t === 2 || t === 3,
+  }))
+
+  const changeLines = rawTypes.map(t => {
+    const isMoving = t === 2 || t === 3
+    const changed = isMoving ? (t === 2 ? 1 : 0) : t
+    return { type: changed }
+  })
+
+  const changeLowerBits = []
+  const changeUpperBits = []
+  for (let i = 0; i < 3; i++) {
+    const isMoving = rawTypes[i] === 2 || rawTypes[i] === 3
+    const yang = rawTypes[i] === 1 || rawTypes[i] === 3
+    changeLowerBits.push(isMoving ? (yang ? 0 : 1) : (yang ? 1 : 0))
+  }
+  for (let i = 3; i < 6; i++) {
+    const isMoving = rawTypes[i] === 2 || rawTypes[i] === 3
+    const yang = rawTypes[i] === 1 || rawTypes[i] === 3
+    changeUpperBits.push(isMoving ? (yang ? 0 : 1) : (yang ? 1 : 0))
+  }
+  const changeLower = parseInt(changeLowerBits.join(''), 2)
+  const changeUpper = parseInt(changeUpperBits.join(''), 2)
+
+  const changeUpperGua = changeUpper === 0 ? 8 : 8 - changeUpper
+  const changeLowerGua = changeLower === 0 ? 8 : 8 - changeLower
+
+  const findGuaName = (upper, lower) => {
+    const idx = guaMap.findIndex(item => {
+      const key = Object.keys(item)[0]
+      return Number(key) === upper && item[key] === lower
+    })
+    return { name: liuyaoGuaNames[idx], index: idx }
+  }
+
+  const mainResult = findGuaName(upperGua, lowerGua)
+  const changeResult = findGuaName(changeUpperGua, changeLowerGua)
+
+  return {
+    mainLines,
+    changeLines,
+    mainGua: mainResult.name,
+    mainGuaIndex: mainResult.index,
+    changeGua: changeResult.name,
+    changeGuaIndex: changeResult.index,
+    movingYao: movingDetails.map(m => m.position),
+  }
+}
+
+const LIU_CHONG_GUA = ['乾为天', '兑为泽', '离为火', '震为雷', '巽为风', '坎为水', '艮为山', '坤为地', '天雷无妄', '雷天大壮']
+const LIU_HE_GUA = ['天地否', '地天泰', '泽水困', '雷地豫', '山火贲', '火山旅', '水泽节', '地雷复']
+
+function getGuaLiuType(guaName) {
+  if (!guaName) return null
+  if (LIU_CHONG_GUA.includes(guaName)) return '六冲'
+  if (LIU_HE_GUA.includes(guaName)) return '六合'
+  return null
 }
 
 export default function LiuYaoDetail() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { result, question } = location.state || {}
-  const [modalOpen, setModalOpen] = useState(false)
-  const [selectedYao, setSelectedYao] = useState(null)
+  const { upperGua, lowerGua, movingDetails, question } = location.state || {}
 
-  if (!result) {
+  const { ganzhiDay } = useLunarStore()
+
+  const liuShen = useMemo(() => {
+    if (!ganzhiDay) return []
+    const tianGan = ganzhiDay.charAt(0)
+    const map = {
+      '甲': ['青龙', '朱雀', '勾陈', '腾蛇', '白虎', '玄武'],
+      '乙': ['青龙', '朱雀', '勾陈', '腾蛇', '白虎', '玄武'],
+      '丙': ['朱雀', '勾陈', '腾蛇', '白虎', '玄武', '青龙'],
+      '丁': ['朱雀', '勾陈', '腾蛇', '白虎', '玄武', '青龙'],
+      '戊': ['勾陈', '腾蛇', '白虎', '玄武', '青龙', '朱雀'],
+      '己': ['腾蛇', '白虎', '玄武', '青龙', '朱雀', '勾陈'],
+      '庚': ['白虎', '玄武', '青龙', '朱雀', '勾陈', '腾蛇'],
+      '辛': ['白虎', '玄武', '青龙', '朱雀', '勾陈', '腾蛇'],
+      '壬': ['玄武', '青龙', '朱雀', '勾陈', '腾蛇', '白虎'],
+      '癸': ['玄武', '青龙', '朱雀', '勾陈', '腾蛇', '白虎'],
+    }
+    return map[tianGan] || []
+  }, [ganzhiDay])
+
+  const hexagram = useMemo(() => {
+    if (upperGua == null || lowerGua == null) return null
+    return reconstructHexagram({ upperGua, lowerGua, movingDetails: movingDetails || [] })
+  }, [upperGua, lowerGua, movingDetails])
+
+  const mainGuaData = useMemo(() => {
+    if (!hexagram?.mainGua) return null
+    return LIU_SHI_SI_GUA.find(g => g.name === hexagram.mainGua) || null
+  }, [hexagram?.mainGua])
+
+  const changeGuaData = useMemo(() => {
+    if (!hexagram?.changeGua) return null
+    return LIU_SHI_SI_GUA.find(g => g.name === hexagram.changeGua) || null
+  }, [hexagram?.changeGua])
+
+  const mainGuaLiuType = useMemo(() => getGuaLiuType(mainGuaData?.name), [mainGuaData?.name])
+  const changeGuaLiuType = useMemo(() => getGuaLiuType(changeGuaData?.name), [changeGuaData?.name])
+
+  const isSameGua = hexagram?.mainGua === hexagram?.changeGua
+
+  const [activeGuaTab, setActiveGuaTab] = useState('main')
+  const effectiveTab = isSameGua ? 'main' : activeGuaTab
+
+  const currentGuaIndex = hexagram?.[effectiveTab === 'main' ? 'mainGuaIndex' : 'changeGuaIndex']
+  const currentGuaName = hexagram?.[effectiveTab === 'main' ? 'mainGua' : 'changeGua']
+  const currentGuaData = currentGuaIndex != null ? guoxueData[currentGuaIndex] : null
+
+  if (!hexagram) {
     return (
-      <div className="p-8 max-w-5xl mx-auto">
-        <div className="flex items-center gap-2 mb-6">
-          <ThunderboltOutlined className="text-lg text-qing-400" />
-          <h1 className="text-2xl font-bold text-hei-400">六爻起卦</h1>
-        </div>
-        <Card className="bg-bai-400 border-hei-400/10">
-          <div className="text-center py-12">
-            <p className="text-hei-400/60 mb-4">暂无摇卦数据</p>
+      <div style={{ padding: 32, maxWidth: 1280, margin: '0 auto' }}>
+        <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
+          <ThunderboltOutlined style={{ fontSize: 18 }} />
+          <Typography.Title level={4} style={{ margin: 0 }}>
+            六爻起卦
+          </Typography.Title>
+        </Flex>
+        <Card>
+          <div style={{ textAlign: 'center', padding: '48px 0' }}>
+            <Typography.Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+              暂无摇卦数据
+            </Typography.Text>
             <Button
               type="primary"
               onClick={() => navigate('/liuyao')}
@@ -64,121 +169,183 @@ export default function LiuYaoDetail() {
   }
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <div className="flex items-center gap-2 mb-6">
+    <div style={{ padding: 32, maxWidth: 1280, margin: '0 auto' }}>
+      <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
         <Button
           type="text"
           icon={<ArrowLeftOutlined />}
           onClick={() => navigate('/liuyao')}
         />
-        <ThunderboltOutlined className="text-lg text-qing-400" />
-        <h1 className="text-2xl font-bold text-hei-400">排盘详情</h1>
-      </div>
+        <ThunderboltOutlined style={{ fontSize: 18 }} />
+        <Typography.Title level={4} style={{ margin: 0 }}>
+          排盘详情
+        </Typography.Title>
+      </Flex>
 
-      <div className="space-y-6">
+      <Flex vertical gap={24}>
         {question && (
-          <Card className="bg-bai-400 border-hei-400/10">
-            <div>
-              <span className="text-sm text-hei-400/60">所问之事</span>
-              <p className="text-hei-400 font-medium mt-1">{question}</p>
-            </div>
+          <Card>
+            <Typography.Text type="secondary" style={{ fontSize: 14 }}>
+              所问之事
+            </Typography.Text>
+            <Typography.Paragraph strong style={{ margin: '4px 0 0 0' }}>
+              {question}
+            </Typography.Paragraph>
           </Card>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Card className="bg-bai-400 border-hei-400/10">
-            <div className="text-center mb-4">
-              <div className="text-sm text-hei-400/60 mb-1">本卦</div>
-              <div className="text-2xl font-bold text-qing-400">{result.mainGua}</div>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 16 }}>
+            <div style={{ width: 36 }} />
+            <div style={{ width: 80 }} />
+            <div style={{ width: 100, textAlign: 'center', overflow: 'visible' }}>
+              <Typography.Title level={5} style={{ margin: 0, whiteSpace: 'nowrap' }}>
+                {(() => {
+                  const info = guaPalaceInfo[hexagram.mainGuaIndex]
+                  return (
+                    <>
+                      {hexagram.mainGua}（{info.palace}
+                      {info.soulType && <span style={{ color: '#0dc2b3' }}>-{info.soulType}</span>}）
+                    </>
+                  )
+                })()}
+              </Typography.Title>
             </div>
-            <div className="space-y-1">
-              {result.lines.map((line, i) => (
-                <GuaLine
+            {!isSameGua && (
+              <>
+                <div style={{ width: 24 }} />
+                <div style={{ width: 24 }} />
+                <div style={{ width: 100, textAlign: 'center', overflow: 'visible' }}>
+                  <Typography.Title level={5} style={{ margin: 0, whiteSpace: 'nowrap' }}>
+                    {(() => {
+                      const info = guaPalaceInfo[hexagram.changeGuaIndex]
+                      return (
+                        <>
+                          {hexagram.changeGua}（{info.palace}
+                          {info.soulType && <span style={{ color: '#0dc2b3' }}>-{info.soulType}</span>}）
+                        </>
+                      )
+                    })()}
+                  </Typography.Title>
+                </div>
+                <div style={{ width: 24 }} />
+                <div style={{ width: 80 }} />
+                <div style={{ width: 36 }} />
+              </>
+            )}
+          </div>
+
+          <Flex vertical gap={4}>
+            {[5,4,3,2,1,0].map(i => {
+              const positionFromBottom = i + 1
+              const mainLine = hexagram.mainLines[i]
+              const changeLine = hexagram.changeLines[i]
+              const isShi = positionFromBottom === mainGuaData?.shi
+              const isYing = positionFromBottom === mainGuaData?.ying
+              return (
+                <div key={i} style={{ padding: '8px 0', minHeight: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  <div style={{ width: 36, textAlign: 'center', fontSize: 13, color: liuShen.length ? '#f5222d' : 'transparent' }}>
+                    {liuShen[i] || ''}
+                  </div>
+                  <div style={{ width: 80, textAlign: 'right', fontSize: 13, color: '#595959' }}>
+                    {mainGuaData?.yaos[5 - i]?.split(' ').reverse().join(' ')}
+                  </div>
+                  <div style={{ width: 100, display: 'flex', justifyContent: 'center' }}>
+                    <YaoDisplay type={mainLine.type} showMoving={false} />
+                  </div>
+                  <div style={{ width: 24, textAlign: 'center', fontSize: 13, fontWeight: 'bold', color: isShi ? '#f5222d' : '#1890ff' }}>
+                    {isShi ? '世' : isYing ? '应' : ''}
+                  </div>
+                  {mainLine.isMoving && <span style={{ fontSize: 12, fontWeight: 700, color: '#2e2e33', width: 24, textAlign: 'center' }}>{mainLine.type === 3 ? '○' : '✕'}</span>}
+                  {!mainLine.isMoving && <span style={{ width: 24 }} />}
+                  {!isSameGua && (
+                    <>
+                      <div style={{ width: 100, display: 'flex', justifyContent: 'center' }}>
+                        <YaoDisplay type={changeLine.type} showMoving={false} />
+                      </div>
+                      <div style={{ width: 24 }} />
+                      <div style={{ width: 80, textAlign: 'left', fontSize: 13, color: '#595959' }}>
+                        {changeGuaData?.yaos[5 - i]?.split(' ').reverse().join(' ')}
+                      </div>
+                      <div style={{ width: 36, textAlign: 'center', fontSize: 13, color: liuShen.length ? '#f5222d' : 'transparent' }}>
+                        {liuShen[i] || ''}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )
+            })}
+          </Flex>
+
+          {(mainGuaLiuType || (!isSameGua && changeGuaLiuType)) && (
+            <div style={{ paddingTop: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+              <div style={{ width: 36 }} />
+              <div style={{ width: 80 }} />
+              <div style={{ width: 100, textAlign: 'center' }}>
+                <Typography.Text style={{ fontSize: 12, color: '#07ec12ff', fontWeight: 600 }}>
+                  本卦{mainGuaLiuType ? `：${mainGuaLiuType}卦` : ''}
+                </Typography.Text>
+              </div>
+              {!isSameGua && (
+                <>
+                  <div style={{ width: 24 }} />
+                  <div style={{ width: 24 }} />
+                  <div style={{ width: 100, textAlign: 'center' }}>
+                    <Typography.Text style={{ fontSize: 12, color: '#07ec12ff', fontWeight: 600 }}>
+                      变卦{changeGuaLiuType ? `：${changeGuaLiuType}卦` : ''}
+                    </Typography.Text>
+                  </div>
+                  <div style={{ width: 24 }} />
+                  <div style={{ width: 80 }} />
+                  <div style={{ width: 36 }} />
+                </>
+              )}
+            </div>
+          )}
+        </div>
+
+        <Divider style={{ margin: '4px 0' }} />
+
+        <Flex gap={12} justify="center">
+          <Button
+            type={activeGuaTab === 'main' ? 'primary' : 'default'}
+            onClick={() => setActiveGuaTab('main')}
+          >
+            本卦·{hexagram?.mainGua}
+          </Button>
+          {!isSameGua && (
+            <Button
+              type={activeGuaTab === 'change' ? 'primary' : 'default'}
+              onClick={() => setActiveGuaTab('change')}
+            >
+              变卦·{hexagram?.changeGua}
+            </Button>
+          )}
+        </Flex>
+
+        {currentGuaData && (
+          <Card>
+            <Typography.Title level={5} style={{ margin: 0 }}>
+              《{currentGuaName}》
+            </Typography.Title>
+            <div style={{ marginTop: 16 }}>
+              {currentGuaData.quan.map((text, i) => (
+                <Typography.Paragraph
                   key={i}
-                  line={line}
-                  index={i}
-                  onClick={() => {
-                    setSelectedYao({ index: 6 - i, line })
-                    setModalOpen(true)
+                  style={{
+                    margin: 0,
+                    padding: '6px 0',
+                    borderBottom: i < currentGuaData.quan.length - 1 ? '1px dashed #f0f0f0' : 'none',
+                    lineHeight: 1.8,
                   }}
-                />
+                >
+                  {text}
+                </Typography.Paragraph>
               ))}
             </div>
-            {result.movingYao.length > 0 && (
-              <div className="mt-4 text-center">
-                <Tag color="error">动爻：{result.movingYao.join('、')}爻</Tag>
-              </div>
-            )}
           </Card>
-
-          <Card className="bg-bai-400 border-hei-400/10">
-            <div className="text-center mb-4">
-              <div className="text-sm text-hei-400/60 mb-1">变卦</div>
-              <div className="text-2xl font-bold text-qing-400">{result.changeGua}</div>
-            </div>
-            <div className="space-y-1 opacity-60">
-              {result.lines.map((line, i) => {
-                const isMoving = line === 0 || line === 1
-                const changed = isMoving ? (line === 1 ? 2 : 3) : line
-                return (
-                  <GuaLine
-                    key={i}
-                    line={changed}
-                    index={i}
-                    onClick={() => {}}
-                  />
-                )
-              })}
-            </div>
-          </Card>
-        </div>
-
-        <div className="flex justify-center">
-          <Button
-            type="primary"
-            onClick={() => navigate('/liuyao')}
-            icon={<ThunderboltOutlined />}
-          >
-            重新摇卦
-          </Button>
-        </div>
-      </div>
-
-      <Modal
-        title="爻辞详解"
-        open={modalOpen}
-        onCancel={() => setModalOpen(false)}
-        width={640}
-        footer={
-          <Button onClick={() => setModalOpen(false)}>关闭</Button>
-        }
-      >
-        {selectedYao && (
-          <div className="space-y-4">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-qing-400 mb-2">
-                第 {selectedYao.index} 爻
-              </div>
-              <Tag color={selectedYao.line === 0 || selectedYao.line === 1 ? 'error' : 'default'}>
-                {selectedYao.line === 0 || selectedYao.line === 1 ? '动爻' : '静爻'}
-              </Tag>
-            </div>
-            <Divider />
-            <div>
-              <h4 className="font-bold text-hei-400 mb-2">爻辞</h4>
-              <p className="text-hei-400/70">
-                {selectedYao.index === 1 && '初爻：潜龙勿用。宜静不宜动，等待时机。'}
-                {selectedYao.index === 2 && '二爻：见龙在田，利见大人。时机初现，可得贵人相助。'}
-                {selectedYao.index === 3 && '三爻：君子终日乾乾，夕惕若，厉无咎。谨慎行事，虽有艰险，终无大咎。'}
-                {selectedYao.index === 4 && '四爻：或跃在渊，无咎。进退皆可，审时度势。'}
-                {selectedYao.index === 5 && '五爻：飞龙在天，利见大人。大吉之象，事事亨通。'}
-                {selectedYao.index === 6 && '上爻：亢龙有悔。盛极而衰，宜收敛退守。'}
-              </p>
-            </div>
-            <Divider />
-          </div>
         )}
-      </Modal>
+      </Flex>
     </div>
   )
 }

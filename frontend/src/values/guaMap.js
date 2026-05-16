@@ -133,6 +133,85 @@ export const guaIndexMap= {
     "3-6": "未济"
 };
 
+export const liuyaoGuaNames = [
+  '乾为天', '坤为地', '水雷屯', '山水蒙', '水天需', '天水讼', '地水师', '水地比',
+  '风天小畜', '天泽履', '地天泰', '天地否', '天火同人', '火天大有', '地山谦', '雷地豫',
+  '泽雷随', '山风蛊', '地泽临', '风地观', '火雷噬嗑', '山火贲', '山地剥', '地雷复',
+  '天雷无妄', '山天大畜', '山雷颐', '泽风大过', '坎为水', '离为火', '泽山咸', '雷风恒',
+  '天山遁', '雷天大壮', '火地晋', '地火明夷', '风火家人', '火泽睽', '水山蹇', '雷水解',
+  '山泽损', '风雷益', '泽天夬', '天风姤', '泽地萃', '地风升', '泽水困', '水风井',
+  '泽火革', '火风鼎', '震为雷', '艮为山', '风山渐', '雷泽归妹', '雷火丰', '火山旅',
+  '巽为风', '兑为泽', '风水涣', '水泽节', '风泽中孚', '雷山小过', '水火既济', '火水未济',
+]
+
+// 八宫信息：palace=所属宫, soulType=归魂/游魂/null
+export const guaPalaceInfo = [
+  { palace: '乾', soulType: null },    // 0: 乾为天
+  { palace: '坤', soulType: null },    // 1: 坤为地
+  { palace: '坎', soulType: null },    // 2: 水雷屯
+  { palace: '离', soulType: null },    // 3: 山水蒙
+  { palace: '坤', soulType: '游魂' },  // 4: 水天需
+  { palace: '离', soulType: '游魂' },  // 5: 天水讼
+  { palace: '坎', soulType: '归魂' },  // 6: 地水师
+  { palace: '坤', soulType: '归魂' },  // 7: 水地比
+  { palace: '巽', soulType: null },    // 8: 风天小畜
+  { palace: '艮', soulType: null },    // 9: 天泽履
+  { palace: '坤', soulType: null },    // 10: 地天泰
+  { palace: '乾', soulType: null },    // 11: 天地否
+  { palace: '离', soulType: '归魂' },  // 12: 天火同人
+  { palace: '乾', soulType: '归魂' },  // 13: 火天大有
+  { palace: '兑', soulType: null },    // 14: 地山谦
+  { palace: '震', soulType: null },    // 15: 雷地豫
+  { palace: '震', soulType: '归魂' },  // 16: 泽雷随
+  { palace: '巽', soulType: '归魂' },  // 17: 山风蛊
+  { palace: '坤', soulType: null },    // 18: 地泽临
+  { palace: '乾', soulType: null },    // 19: 风地观
+  { palace: '巽', soulType: null },    // 20: 火雷噬嗑
+  { palace: '艮', soulType: null },    // 21: 山火贲
+  { palace: '乾', soulType: null },    // 22: 山地剥
+  { palace: '坤', soulType: null },    // 23: 地雷复
+  { palace: '巽', soulType: null },    // 24: 天雷无妄
+  { palace: '艮', soulType: null },    // 25: 山天大畜
+  { palace: '巽', soulType: '游魂' },  // 26: 山雷颐
+  { palace: '震', soulType: '游魂' },  // 27: 泽风大过
+  { palace: '坎', soulType: null },    // 28: 坎为水
+  { palace: '离', soulType: null },    // 29: 离为火
+  { palace: '兑', soulType: null },    // 30: 泽山咸
+  { palace: '震', soulType: null },    // 31: 雷风恒
+  { palace: '乾', soulType: null },    // 32: 天山遁
+  { palace: '坤', soulType: null },    // 33: 雷天大壮
+  { palace: '乾', soulType: '游魂' },  // 34: 火地晋
+  { palace: '坎', soulType: '游魂' },  // 35: 地火明夷
+  { palace: '巽', soulType: null },    // 36: 风火家人
+  { palace: '艮', soulType: null },    // 37: 火泽睽
+  { palace: '兑', soulType: null },    // 38: 水山蹇
+  { palace: '震', soulType: null },    // 39: 雷水解
+  { palace: '艮', soulType: null },    // 40: 山泽损
+  { palace: '巽', soulType: null },    // 41: 风雷益
+  { palace: '坤', soulType: null },    // 42: 泽天夬
+  { palace: '乾', soulType: null },    // 43: 天风姤
+  { palace: '兑', soulType: null },    // 44: 泽地萃
+  { palace: '震', soulType: null },    // 45: 地风升
+  { palace: '兑', soulType: null },    // 46: 泽水困
+  { palace: '震', soulType: null },    // 47: 水风井
+  { palace: '坎', soulType: null },    // 48: 泽火革
+  { palace: '离', soulType: null },    // 49: 火风鼎
+  { palace: '震', soulType: null },    // 50: 震为雷
+  { palace: '艮', soulType: null },    // 51: 艮为山
+  { palace: '艮', soulType: '归魂' },  // 52: 风山渐
+  { palace: '兑', soulType: '归魂' },  // 53: 雷泽归妹
+  { palace: '坎', soulType: null },    // 54: 雷火丰
+  { palace: '离', soulType: null },    // 55: 火山旅
+  { palace: '巽', soulType: null },    // 56: 巽为风
+  { palace: '兑', soulType: null },    // 57: 兑为泽
+  { palace: '离', soulType: null },    // 58: 风水涣
+  { palace: '坎', soulType: null },    // 59: 水泽节
+  { palace: '艮', soulType: '游魂' },  // 60: 风泽中孚
+  { palace: '兑', soulType: '游魂' },  // 61: 雷山小过
+  { palace: '坎', soulType: null },    // 62: 水火既济
+  { palace: '离', soulType: null },    // 63: 火水未济
+]
+
 export const hexagramData = {
     '111111': '乾为天',
     '000000': '坤为地',

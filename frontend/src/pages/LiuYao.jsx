@@ -1,4 +1,4 @@
-import { Card, Button, Tabs, Select, Input } from 'antd'
+import { Card, Button, Input, Select, Tabs, Flex, Typography } from 'antd'
 import {
   ThunderboltOutlined,
   SlidersOutlined,
@@ -6,23 +6,8 @@ import {
 import { useState, useCallback } from 'react'
 import YaoDisplay from '../components/YaoDisplay'
 import { useNavigate } from 'react-router-dom'
+import { guaMap, liuyaoGuaNames } from '../values/guaMap'
 
-const bagua = [7, 6, 5, 4, 3, 2, 1, 0]
-
-const liuyaoGuaNames = [
-  '乾为天', '坤为地', '水雷屯', '山水蒙', '水天需', '天水讼', '地水师', '水地比',
-  '风天小畜', '天泽履', '地天泰', '天地否', '天火同人', '火天大有', '地山谦', '雷地豫',
-  '泽雷随', '山风蛊', '地泽临', '风地观', '火雷噬嗑', '山火贲', '山地剥', '地雷复',
-  '天雷无妄', '山天大畜', '山雷颐', '泽风大过', '坎为水', '离为火', '泽山咸', '雷风恒',
-  '天山遁', '雷天大壮', '火地晋', '地火明夷', '风火家人', '火泽睽', '水山蹇', '雷水解',
-  '山泽损', '风雷益', '泽天夬', '天风姤', '泽地萃', '地风升', '泽水困', '水风井',
-  '泽火革', '火风鼎', '震为雷', '艮为山', '风山渐', '雷泽归妹', '雷火丰', '火山旅',
-  '巽为风', '兑为泽', '风水涣', '水泽节', '风泽中孚', '雷山小过', '水火既济', '火水未济',
-]
-
-function getGuaIndex(upper, lower) {
-  return bagua[upper] * 8 + bagua[lower]
-}
 
 function generateAutoLines() {
   const lines = []
@@ -35,35 +20,71 @@ function generateAutoLines() {
 }
 
 function computeHexagram(lines) {
-  const upperBits = []
-  const lowerBits = []
-  const changeBits = []
+  const isYang = (line) => line === 1 || line === 3
+  const isMoving = (line) => line === 2 || line === 3
 
-  for (let i = 5; i >= 0; i--) {
+  const lowerBinary = (isYang(lines[0]) ? 4 : 0) + (isYang(lines[1]) ? 2 : 0) + (isYang(lines[2]) ? 1 : 0)
+  const upperBinary = (isYang(lines[3]) ? 4 : 0) + (isYang(lines[4]) ? 2 : 0) + (isYang(lines[5]) ? 1 : 0)
+
+  const changeLowerBits = []
+  const changeUpperBits = []
+  for (let i = 0; i < 3; i++) {
     const line = lines[i]
-    const isYang = line === 1 || line === 3
-    const isMoving = line === 0 || line === 1
-    if (i >= 3) {
-      upperBits.push(isYang ? 1 : 0)
-    } else {
-      lowerBits.push(isYang ? 1 : 0)
+    const yang = isYang(line)
+    changeLowerBits.push(isMoving(line) ? (yang ? 0 : 1) : (yang ? 1 : 0))
+  }
+  for (let i = 3; i < 6; i++) {
+    const line = lines[i]
+    const yang = isYang(line)
+    changeUpperBits.push(isMoving(line) ? (yang ? 0 : 1) : (yang ? 1 : 0))
+  }
+  const changeLower = parseInt(changeLowerBits.join(''), 2)
+  const changeUpper = parseInt(changeUpperBits.join(''), 2)
+
+  const upperGua = upperBinary === 0 ? 8 : 8 - upperBinary
+  const lowerGua = lowerBinary === 0 ? 8 : 8 - lowerBinary
+  const changeUpperGua = changeUpper === 0 ? 8 : 8 - changeUpper
+  const changeLowerGua = changeLower === 0 ? 8 : 8 - changeLower
+
+  const mainGuaIndex = guaMap.findIndex(item => {
+    const key = Object.keys(item)[0]
+    return Number(key) === upperGua && item[key] === lowerGua
+  })
+  const changeGuaIndex = guaMap.findIndex(item => {
+    const key = Object.keys(item)[0]
+    return Number(key) === changeUpperGua && item[key] === changeLowerGua
+  })
+
+  const mainGua = liuyaoGuaNames[mainGuaIndex]
+  const changeGua = liuyaoGuaNames[changeGuaIndex]
+
+  const movingDetails = []
+  for (let i = 0; i < 6; i++) {
+    if (lines[i] === 2 || lines[i] === 3) {
+      movingDetails.push({ position: i + 1, type: lines[i] })
     }
-    changeBits.push(isMoving ? (isYang ? 0 : 1) : (isYang ? 1 : 0))
   }
 
-  const upperIdx = parseInt(upperBits.join(''), 2)
-  const lowerIdx = parseInt(lowerBits.join(''), 2)
-  const changeUpper = parseInt(changeBits.slice(0, 3).join(''), 2)
-  const changeLower = parseInt(changeBits.slice(3, 6).join(''), 2)
+  const mainLines = lines.map(line => ({
+    type: line,
+    isMoving: line === 2 || line === 3,
+  }))
 
-  const mainGua = liuyaoGuaNames[getGuaIndex(upperIdx, lowerIdx)]
-  const changeGua = liuyaoGuaNames[getGuaIndex(changeUpper, changeLower)]
+  const changeLines = lines.map(line => {
+    const isMoving = line === 2 || line === 3
+    const changed = isMoving ? (line === 2 ? 1 : 0) : line
+    return { type: changed }
+  })
 
   return {
-    lines: lines.reverse(),
     mainGua,
     changeGua,
-    movingYao: lines.map((l, i) => (l === 0 || l === 1 ? 6 - i : null)).filter(Boolean),
+    movingYao: movingDetails.map(m => m.position),
+    movingDetails,
+    upperGua,
+    lowerGua,
+    mainLines,
+    changeLines,
   }
 }
 
@@ -72,7 +93,6 @@ export default function LiuYao() {
   const [method, setMethod] = useState('manual')
   const [question, setQuestion] = useState('')
   const [manualLines, setManualLines] = useState(Array(6).fill(0))
-  const [loading, setLoading] = useState(false)
 
   const handleLineChange = useCallback((index, value) => {
     setManualLines(prev => {
@@ -83,65 +103,112 @@ export default function LiuYao() {
   }, [])
 
   const handleCast = useCallback(() => {
-    setLoading(true)
-
-    setTimeout(() => {
-      const rawLines = method === 'manual'
-        ? manualLines.map(l => l === 0 ? 2 : 3)
-        : generateAutoLines()
-      const result = computeHexagram(rawLines)
-      setLoading(false)
-      navigate('/liuyao/detail', { state: { result, question } })
-    }, 1000)
+    const rawLines = method === 'manual' ? manualLines : generateAutoLines()
+    const result = computeHexagram(rawLines)
+    
+    navigate('/liuyao/detail', {
+      state: {
+        upperGua: result.upperGua,
+        lowerGua: result.lowerGua,
+        movingDetails: result.movingDetails,
+        method,
+        question,
+      },
+    })
   }, [method, manualLines, question, navigate])
-
-  const canSubmit = method === 'auto' || method === 'manual'
 
   const tabItems = [
     {
       key: 'manual',
-      label: (
-        <span><SlidersOutlined /> 手动指定</span>
-      ),
+      label: <span><SlidersOutlined /> 手动指定</span>,
       children: (
-        <div className="mt-4 space-y-[10px]">
-          <p className="text-sm text-hei-400/60 mb-3">逐爻选择阴阳</p>
-          {[5, 4, 3, 2, 1, 0].map((dataIndex) => {
-            const label = ['初', '二', '三', '四', '五', '上'][dataIndex]
-            return (
-              <div key={dataIndex} className="flex items-center gap-4">
-                <span className="text-sm text-hei-400/60 w-8 shrink-0">{label}爻</span>
-                <Select
-                  size="small"
-                  value={manualLines[dataIndex]}
-                  onChange={(val) => handleLineChange(dataIndex, val)}
-                  style={{ width: 112 }}
-                  options={[
-                    { value: 0, label: '阴爻' },
-                    { value: 1, label: '阳爻' },
-                  ]}
-                />
-                <YaoDisplay type={manualLines[dataIndex]} />
-              </div>
-            )
-          })}
-        </div>
+        <Flex style={{ marginTop: 16 }} gap={40}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <Typography.Text style={{ display: 'block', marginBottom: 12, color: 'rgba(46, 46, 51, 0.6)' }}>
+              逐爻选择阴阳
+            </Typography.Text>
+            {[5, 4, 3, 2, 1, 0].map((dataIndex) => {
+              const label = ['初', '二', '三', '四', '五', '上'][dataIndex]
+              return (
+                <Flex key={dataIndex} align="center" gap={16}>
+                  <Typography.Text style={{ width: 32, flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+                    {label}爻
+                  </Typography.Text>
+                  <Select
+                    size="small"
+                    value={manualLines[dataIndex]}
+                    onChange={(val) => handleLineChange(dataIndex, val)}
+                    style={{ width: 224 }}
+                    options={[
+                      {
+                        value: 0,
+                        label: (
+                          <Flex align="center" gap={8}>
+                            <Typography.Text style={{ flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+                              少阴
+                            </Typography.Text>
+                            <YaoDisplay type={0} />
+                          </Flex>
+                        ),
+                      },
+                      {
+                        value: 1,
+                        label: (
+                          <Flex align="center" gap={8}>
+                            <Typography.Text style={{ flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+                              少阳
+                            </Typography.Text>
+                            <YaoDisplay type={1} />
+                          </Flex>
+                        ),
+                      },
+                      {
+                        value: 2,
+                        label: (
+                          <Flex align="center" gap={8}>
+                            <Typography.Text style={{ flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+                              老阴
+                            </Typography.Text>
+                            <YaoDisplay type={2} />
+                          </Flex>
+                        ),
+                      },
+                      {
+                        value: 3,
+                        label: (
+                          <Flex align="center" gap={8}>
+                            <Typography.Text style={{ flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+                              老阳
+                            </Typography.Text>
+                            <YaoDisplay type={3} />
+                          </Flex>
+                        ),
+                      },
+                    ]}
+                  />
+                </Flex>
+              )
+            })}
+          </div>
+        </Flex>
       ),
     },
     {
       key: 'auto',
-      label: (
-        <span><ThunderboltOutlined /> 自动起卦</span>
-      ),
+      label: <span><ThunderboltOutlined /> 自动起卦</span>,
       children: (
-        <div className="mt-4">
-          <p className="text-sm text-hei-400/60 mb-4">
+        <div style={{ marginTop: 16 }}>
+          <Typography.Paragraph style={{ marginBottom: 16, color: 'rgba(46, 46, 51, 0.6)' }}>
             以当前时间为种子自动生成卦象，心诚则灵。
-          </p>
-          <div className="bg-hei-400/5 rounded-lg p-6 text-center">
-            <ThunderboltOutlined className="text-2xl text-qing-400 mx-auto mb-3 block" />
-            <p className="text-hei-400/70">点击下方「开始摇卦」按钮</p>
-            <p className="text-sm text-hei-400/50 mt-1">系统将根据当前时间自动起卦</p>
+          </Typography.Paragraph>
+          <div style={{ borderRadius: 8, padding: 24, textAlign: 'center', backgroundColor: 'rgba(46, 46, 51, 0.05)' }}>
+            <ThunderboltOutlined style={{ fontSize: 24, margin: '0 auto 12px', display: 'block', color: '#7bc3db' }} />
+            <Typography.Text style={{ display: 'block', color: 'rgba(46, 46, 51, 0.7)' }}>
+              点击下方「开始排盘」按钮
+            </Typography.Text>
+            <Typography.Text style={{ display: 'block', marginTop: 4, fontSize: 14, color: 'rgba(46, 46, 51, 0.5)' }}>
+              系统将根据当前时间自动起卦
+            </Typography.Text>
           </div>
         </div>
       ),
@@ -149,20 +216,22 @@ export default function LiuYao() {
   ]
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
-      <div className="flex items-center gap-2 mb-6">
-        <ThunderboltOutlined className="text-lg text-qing-400" />
-        <h1 className="text-2xl font-bold text-hei-400">六爻起卦</h1>
-      </div>
+    <div style={{ padding: 32, maxWidth: 1024, margin: '0 auto' }}>
+      <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
+        <ThunderboltOutlined style={{ fontSize: 18, color: '#7bc3db' }} />
+        <Typography.Title level={4} style={{ marginBottom: 0, color: '#2e2e33' }}>
+          六爻起卦
+        </Typography.Title>
+      </Flex>
 
-      <Card className="bg-bai-400 border-hei-400/10 mb-6">
-        <div className="space-y-4">
+      <Card style={{ marginBottom: 24, backgroundColor: '#f5f1ee', borderColor: 'rgba(46, 46, 51, 0.1)' }}>
+        <Flex vertical gap={16}>
           <Input.TextArea
-            label="所问之事（选填）"
             placeholder="请诚心默念你所问之事..."
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             style={{ maxWidth: 480 }}
+            rows={3}
           />
 
           <Tabs
@@ -175,13 +244,11 @@ export default function LiuYao() {
             type="primary"
             size="large"
             onClick={handleCast}
-            loading={loading}
-            disabled={!canSubmit}
-            className="!w-full"
+            style={{ width: '100%' }}
           >
-            {loading ? '摇卦中...' : '开始排盘'}
+            开始排盘
           </Button>
-        </div>
+        </Flex>
       </Card>
     </div>
   )
