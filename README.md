@@ -50,8 +50,7 @@
 | [Vite 5](https://vitejs.dev/) | 前端构建工具 |
 | [Tailwind CSS 3](https://tailwindcss.com/) | 原子化 CSS |
 | [Framer Motion](https://www.framer.com/motion/) | 页面动画 |
-| [html2canvas](https://html2canvas.hertzen.com/) | 卦象截图导出 |
-| [Axios](https://axios-http.com/) | HTTP 请求（农历数据 API） |
+| [html-to-image](https://github.com/bubkoo/html-to-image) | 卦象截图导出 |
 
 ### 后端
 - **Go 1.23+**
@@ -120,7 +119,7 @@ windnote/
 ## 数据来源
 
 - **六十四卦经文**：取自《周易》原文（卦辞、彖传、象传）
-- **农历信息**：通过公开 API 获取实时农历、干支、生肖数据
+- **农历信息**：通过 Go 后端代理请求公开 API 获取实时农历、干支、生肖数据
 
 ## 许可
 
