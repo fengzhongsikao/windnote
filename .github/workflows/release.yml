@@ -4,6 +4,13 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g. 1.0.0)'
+        required: true
+        default: '1.0.0'
+        type: string
 
 permissions:
   contents: write
@@ -60,10 +67,14 @@ jobs:
       - name: Install Wails CLI
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
-      - name: Inject version from tag
+      - name: Inject version
         shell: bash
         run: |
-          TAG_VERSION=${GITHUB_REF_NAME#v}
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG_VERSION="${{ github.event.inputs.version }}"
+          else
+            TAG_VERSION="${GITHUB_REF_NAME#v}"
+          fi
           echo "Release version: $TAG_VERSION"
           sed -i '' "s/return \"[0-9.]*\"/return \"$TAG_VERSION\"/" app.go || \
           sed -i "s/return \"[0-9.]*\"/return \"$TAG_VERSION\"/" app.go
@@ -98,6 +109,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Determine version and tag
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "tag=v${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+            echo "name=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "tag=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+            echo "name=${{ github.ref_name }}" >> $GITHUB_OUTPUT
+          fi
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -109,6 +131,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.name }}
           files: artifacts/**/*
           generate_release_notes: true
           fail_on_unmatched_files: true
