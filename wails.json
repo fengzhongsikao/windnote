@@ -7,7 +7,7 @@
   "frontend:dev:watcher": "deno run dev",
   "frontend:dev:serverUrl": "auto",
   "author": {
-    "name": "aipose",
-    "email": "your_email@example.com"
+    "name": "windnote",
+    "email": "boltjolt@qq.com"
   }
 }
