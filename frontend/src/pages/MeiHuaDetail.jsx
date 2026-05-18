@@ -1,9 +1,13 @@
-import { Card, Button, Flex, Typography, Row, Col } from 'antd'
+import { Card, Button, Flex, Typography, Row, Col, message } from 'antd'
 import {
   DashboardOutlined,
   ArrowLeftOutlined,
+  DownloadOutlined,
 } from '@ant-design/icons'
+import { useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { toBlob } from 'html-to-image'
+import { SaveScreenshot } from '../../wailsjs/go/main/App'
 import { guaIndexMap, guaMap } from '../values/guaMap'
 import guoxueData from '../assets/guoxue.json'
 
@@ -226,6 +230,33 @@ export default function MeiHuaDetail() {
   const location = useLocation()
   const { upperNum, lowerNum, movingYao, methodName } = location.state || {}
 
+  const contentRef = useRef(null)
+
+  const handleScreenshot = useCallback(async () => {
+    if (!contentRef.current) return
+    try {
+      const blob = await toBlob(contentRef.current, {
+        backgroundColor: '#ffffff',
+        pixelRatio: 2,
+        cacheBust: true,
+      })
+      if (!blob) return
+
+      const reader = new FileReader()
+      reader.readAsDataURL(blob)
+      reader.onload = async () => {
+        const dataUrl = reader.result
+        const filename = `梅花排盘-${mainGua?.name || 'unknown'}.png`
+        const savePath = await SaveScreenshot(filename, dataUrl)
+        if (savePath) {
+          message.success(`截图已保存到 ${savePath}`)
+        }
+      }
+    } catch {
+      message.error('截图保存失败')
+    }
+  }, [])
+
   if (!upperNum || !lowerNum) {
     return (
       <div style={{ padding: 32, maxWidth: 1060, margin: '0 auto' }}>
@@ -286,20 +317,29 @@ export default function MeiHuaDetail() {
 
   return (
     <div style={{ padding: 32, maxWidth: 1060, margin: '0 auto' }}>
-      <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
+      <Flex align="center" justify="space-between" style={{ marginBottom: 24 }}>
+        <Flex align="center" gap={8}>
+          <Button
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate('/meihua')}
+          />
+          <DashboardOutlined style={{ fontSize: 18, color: '#7bc3db' }} />
+          <Typography.Title level={3} style={{ color: '#2e2e33', margin: 0 }}>
+            排盘详情
+          </Typography.Title>
+        </Flex>
         <Button
-          type="text"
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate('/meihua')}
-        />
-        <DashboardOutlined style={{ fontSize: 18, color: '#7bc3db' }} />
-        <Typography.Title level={3} style={{ color: '#2e2e33', margin: 0 }}>
-          排盘详情
-        </Typography.Title>
+          type="default"
+          icon={<DownloadOutlined />}
+          onClick={handleScreenshot}
+        >
+          截图保存
+        </Button>
       </Flex>
 
       <Flex vertical gap={24}>
-        <div>
+        <div ref={contentRef}>
           <Typography.Title level={4} style={{ color: '#2e2e33', marginBottom: 16 }}>
             排盘结果
           </Typography.Title>

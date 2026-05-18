@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -37,15 +37,17 @@ func (a *App) GetAppVersion() string {
 	return "1.0.0"
 }
 
-// SaveScreenshot saves a base64 encoded image to the user's downloads folder
+// SaveScreenshot saves a base64 encoded image to a user-selected file path
 func (a *App) SaveScreenshot(filename string, data string) (string, error) {
 	// Remove base64 prefix if present
 	if idx := strings.Index(data, ","); idx != -1 {
 		data = data[idx+1:]
 	}
 
-	// For simplicity, we'll let frontend handle base64 and just save the blob
-	// Actually, let's use runtime.SaveFileDialog for better UX
+	decoded, err := base64.StdEncoding.DecodeString(data)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode base64: %w", err)
+	}
 
 	savePath, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
 		DefaultFilename: filename,
@@ -61,8 +63,7 @@ func (a *App) SaveScreenshot(filename string, data string) (string, error) {
 		return "", fmt.Errorf("user cancelled")
 	}
 
-	// Write file
-	err = os.WriteFile(savePath, []byte(data), 0644)
+	err = os.WriteFile(savePath, decoded, 0644)
 	if err != nil {
 		return "", err
 	}
@@ -77,26 +78,4 @@ func (a *App) GetDefaultSavePath() string {
 		return ""
 	}
 	return filepath.Join(home, "Downloads")
-}
-
-// GetTodayAlmanac returns today's almanac info
-func (a *App) GetTodayAlmanac() map[string]string {
-	now := time.Now()
-	weekday := []string{"日", "一", "二", "三", "四", "五", "六"}[now.Weekday()]
-
-	return map[string]string{
-		"date":     fmt.Sprintf("%d年%d月%d日", now.Year(), now.Month(), now.Day()),
-		"weekday":  weekday,
-		"yi":       "祭祀 祈福 求嗣",
-		"ji":       "动土 嫁娶 出行",
-		"caishen":  "东南",
-		"xishen":   "正南",
-		"fushen":   "正东",
-		"yanggui":  "东北",
-	}
-}
-
-// GetLocation returns the default location
-func (a *App) GetLocation() string {
-	return "广东中山"
 }

@@ -5,10 +5,6 @@ export function GetAppVersion():Promise<string>;
 
 export function GetDefaultSavePath():Promise<string>;
 
-export function GetLocation():Promise<string>;
-
-export function GetTodayAlmanac():Promise<Record<string, string>>;
-
 export function Greet(arg1:string):Promise<string>;
 
 export function SaveScreenshot(arg1:string,arg2:string):Promise<string>;

@@ -10,14 +10,6 @@ export function GetDefaultSavePath() {
   return window['go']['main']['App']['GetDefaultSavePath']();
 }
 
-export function GetLocation() {
-  return window['go']['main']['App']['GetLocation']();
-}
-
-export function GetTodayAlmanac() {
-  return window['go']['main']['App']['GetTodayAlmanac']();
-}
-
 export function Greet(arg1) {
   return window['go']['main']['App']['Greet'](arg1);
 }

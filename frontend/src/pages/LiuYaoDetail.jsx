@@ -1,10 +1,13 @@
-import { Card, Button, Typography, Flex, Divider } from 'antd'
+import { Card, Button, Typography, Flex, Divider, message } from 'antd'
 import {
   ThunderboltOutlined,
   ArrowLeftOutlined,
+  DownloadOutlined,
 } from '@ant-design/icons'
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useRef, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { toBlob } from 'html-to-image'
+import { SaveScreenshot } from '../../wailsjs/go/main/App'
 import YaoDisplay from '../components/YaoDisplay'
 import { guaMap, liuyaoGuaNames, guaPalaceInfo } from '../values/guaMap'
 import { LIU_SHI_SI_GUA } from '../values/liushisi-gua'
@@ -141,6 +144,33 @@ export default function LiuYaoDetail() {
   const currentGuaName = hexagram?.[effectiveTab === 'main' ? 'mainGua' : 'changeGua']
   const currentGuaData = currentGuaIndex != null ? guoxueData[currentGuaIndex] : null
 
+  const contentRef = useRef(null)
+
+  const handleScreenshot = useCallback(async () => {
+    if (!contentRef.current) return
+    try {
+      const blob = await toBlob(contentRef.current, {
+        backgroundColor: '#ffffff',
+        pixelRatio: 2,
+        cacheBust: true,
+      })
+      if (!blob) throw new Error('Failed to generate blob')
+
+      const reader = new FileReader()
+      reader.readAsDataURL(blob)
+      reader.onload = async () => {
+        const dataUrl = reader.result
+        const filename = `六爻排盘-${hexagram?.mainGua || 'unknown'}.png`
+        const savePath = await SaveScreenshot(filename, dataUrl)
+        if (savePath) {
+          message.success(`截图已保存到 ${savePath}`)
+        }
+      }
+    } catch {
+      message.error('截图保存失败')
+    }
+  }, [hexagram])
+
   if (!hexagram) {
     return (
       <div style={{ padding: 32, maxWidth: 1280, margin: '0 auto' }}>
@@ -170,19 +200,29 @@ export default function LiuYaoDetail() {
 
   return (
     <div style={{ padding: 32, maxWidth: 1280, margin: '0 auto' }}>
-      <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
+      <Flex align="center" justify="space-between" style={{ marginBottom: 24 }}>
+        <Flex align="center" gap={8}>
+          <Button
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate('/liuyao')}
+          />
+          <ThunderboltOutlined style={{ fontSize: 18 }} />
+          <Typography.Title level={4} style={{ margin: 0 }}>
+            排盘详情
+          </Typography.Title>
+        </Flex>
         <Button
-          type="text"
-          icon={<ArrowLeftOutlined />}
-          onClick={() => navigate('/liuyao')}
-        />
-        <ThunderboltOutlined style={{ fontSize: 18 }} />
-        <Typography.Title level={4} style={{ margin: 0 }}>
-          排盘详情
-        </Typography.Title>
+          type="default"
+          icon={<DownloadOutlined />}
+          onClick={handleScreenshot}
+        >
+          截图保存
+        </Button>
       </Flex>
 
-      <Flex vertical gap={24}>
+      <div ref={contentRef}>
+        <Flex vertical gap={24}>
         {question && (
           <Card>
             <Typography.Text type="secondary" style={{ fontSize: 14 }}>
@@ -303,8 +343,10 @@ export default function LiuYaoDetail() {
             </div>
           )}
         </div>
+        </Flex>
+      </div>
 
-        <Divider style={{ margin: '4px 0' }} />
+      <Divider style={{ margin: '4px 0' }} />
 
         <Flex gap={12} justify="center">
           <Button
@@ -345,7 +387,6 @@ export default function LiuYaoDetail() {
             </div>
           </Card>
         )}
-      </Flex>
     </div>
   )
 }
