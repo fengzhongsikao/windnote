@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import axios from 'axios'
+import { FetchLunarData } from '../../wailsjs/go/main/App'
 
 const initialState = {
   lunarData: null,
@@ -68,8 +68,8 @@ const useLunarStore = create((set) => ({
   refreshLunarData: async () => {
     set({ loading: true, error: null })
     try {
-      const res = await axios.get('/api/lunartime')
-      const data = res.data
+      const result = await FetchLunarData()
+      const data = JSON.parse(result)
       set({
         lunarData: data,
         loading: false,
