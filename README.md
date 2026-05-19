@@ -53,14 +53,13 @@
 | [html-to-image](https://github.com/bubkoo/html-to-image) | 卦象截图导出 |
 
 ### 后端
-- **Go 1.23+**
+- **Go 1.26.3
 - **Wails v2.12** — 提供系统文件对话框、窗口管理等原生能力
 
 ## 快速开始
 
 ### 前置要求
-- Go 1.23+
-- Node.js 18+
+- Go 1.26.3
 - [Wails CLI](https://wails.io/docs/gettingstarted/installation)
 - [Deno](https://deno.com/)（本项目使用 Deno 管理前端依赖）
 
@@ -69,6 +68,9 @@
 ```bash
 # 安装 Wails CLI（如未安装）
 go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+# 安装前端依赖（在 frontend 目录下）
+cd frontend && deno install && cd ..
 
 # 开发模式运行（热重载）
 wails dev
