@@ -63,25 +63,49 @@
 - [Wails CLI](https://wails.io/docs/gettingstarted/installation)
 - [Deno](https://deno.com/)（本项目使用 Deno 管理前端依赖）
 
-### 安装与运行
+### 安装
 
 ```bash
-# 安装 Wails CLI（如未安装）
+# 1. 安装 Wails CLI
 go install github.com/wailsapp/wails/v2/cmd/wails@latest
-
-# 安装前端依赖（在 frontend 目录下）
-cd frontend && deno install && cd ..
-
-# 开发模式运行（热重载）
-wails dev
-
-# 构建生产版本
-wails build
 ```
 
-开发模式下：
-- 前端 Vite 开发服务器提供热重载，默认端口 **34115**
-- Go 后端与前端通过 Wails Bind 通信
+### 运行
+
+```bash
+# 开发模式（热重载）
+# Wails 会自动执行 deno install 并启动 Vite 开发服务器
+wails dev
+```
+
+### 构建
+
+```bash
+# 构建当前平台的生产版本
+# Wails 会自动：deno install → vite build → go build → 嵌入前端资源
+wails build -clean
+```
+
+> **注意**：`wails dev` 和 `wails build` 会自动管理前端流程，无需手动进入 `frontend/` 目录执行安装或构建。
+>
+> `wails build` 会将前端构建产物嵌入 Go 二进制文件，生成单个可执行文件。
+
+### 仅构建前端（调试用）
+
+```bash
+cd frontend
+deno install
+deno run build     # 生成 frontend/dist/
+```
+
+### 开发架构
+
+```
+wails dev
+  ├── deno install           ← 安装前端依赖
+  ├── vite dev server        ← 前端热重载（端口 34115）
+  └── go build → wails run   ← Go 后端（与前端通过 Wails Bind 通信）
+```
 
 ## 项目结构
 
