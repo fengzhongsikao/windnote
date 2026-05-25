@@ -8,22 +8,22 @@ import { useState, useCallback } from 'react'
 import YaoDisplay from '../components/YaoDisplay'
 import { useNavigate } from 'react-router-dom'
 
-function toGuaNum(n) {
+function toGuaNum(n: number) {
   const r = n % 8
   return r === 0 ? 8 : r
 }
 
-function toYaoNum(n) {
+function toYaoNum(n: number) {
   const r = n % 6
   return r === 0 ? 6 : r
 }
 
-function generateMeihua(method, numberInput, manualLines, movingYao, movingWithShichen) {
+function generateMeihua(method: string, numberInput: number | null, manualLines: number[] | null, movingYao: number, movingWithShichen: boolean) {
   let upperNum, lowerNum, moving
 
   if (method === 'manual') {
-    const lowerBits = manualLines[0] * 4 + manualLines[1] * 2 + manualLines[2] * 1
-    const upperBits = manualLines[3] * 4 + manualLines[4] * 2 + manualLines[5] * 1
+    const lowerBits = manualLines![0] * 4 + manualLines![1] * 2 + manualLines![2] * 1
+    const upperBits = manualLines![3] * 4 + manualLines![4] * 2 + manualLines![5] * 1
     upperNum = 8 - upperBits
     lowerNum = 8 - lowerBits
     moving = movingYao
@@ -78,16 +78,16 @@ function generateMeihua(method, numberInput, manualLines, movingYao, movingWithS
 export default function MeiHua() {
   const navigate = useNavigate()
   const [method, setMethod] = useState('manual')
-  const [numberValue, setNumberValue] = useState('')
+  const [numberValue, setNumberValue] = useState<number | null>(null)
   const [question, setQuestion] = useState('')
   const [manualLines, setManualLines] = useState(Array(6).fill(0))
   const [movingYao, setMovingYao] = useState(1)
   const [movingWithShichen, setMovingWithShichen] = useState(false)
 
-  const handleLineChange = useCallback((index, value) => {
+  const handleLineChange = useCallback((index: number, value: number) => {
     setManualLines(prev => {
       const next = [...prev]
-      next[index] = parseInt(value)
+      next[index] = value
       return next
     })
   }, [])

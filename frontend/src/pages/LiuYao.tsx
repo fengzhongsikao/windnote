@@ -19,9 +19,9 @@ function generateAutoLines() {
   return lines
 }
 
-function computeHexagram(lines) {
-  const isYang = (line) => line === 1 || line === 3
-  const isMoving = (line) => line === 2 || line === 3
+function computeHexagram(lines: number[]) {
+  const isYang = (line: number) => line === 1 || line === 3
+  const isMoving = (line: number) => line === 2 || line === 3
 
   const lowerBinary = (isYang(lines[0]) ? 4 : 0) + (isYang(lines[1]) ? 2 : 0) + (isYang(lines[2]) ? 1 : 0)
   const upperBinary = (isYang(lines[3]) ? 4 : 0) + (isYang(lines[4]) ? 2 : 0) + (isYang(lines[5]) ? 1 : 0)
@@ -94,7 +94,7 @@ export default function LiuYao() {
   const [question, setQuestion] = useState('')
   const [manualLines, setManualLines] = useState(Array(6).fill(0))
 
-  const handleLineChange = useCallback((index, value) => {
+  const handleLineChange = useCallback((index: number, value: string) => {
     setManualLines(prev => {
       const next = [...prev]
       next[index] = parseInt(value)
@@ -233,7 +233,6 @@ export default function LiuYao() {
             style={{ maxWidth: 480 }}
             rows={3}
           />
-
           <Tabs
             activeKey={method}
             onChange={setMethod}

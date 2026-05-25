@@ -99,7 +99,6 @@ export default function Library() {
         prefix={<SearchOutlined style={{ color: 'rgba(46, 46, 51, 0.4)' }} />}
         style={{ maxWidth: 384, marginBottom: 24 }}
       />
-
       <Tabs items={tabItems} />
     </div>
   )
