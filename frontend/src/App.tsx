@@ -11,10 +11,12 @@ import {
 } from '@ant-design/icons'
 import { useState } from 'react'
 import Dashboard from './pages/Dashboard'
-import LiuYao from './pages/LiuYao'
-import LiuYaoDetail from './pages/LiuYaoDetail'
-import MeiHua from './pages/MeiHua'
-import MeiHuaDetail from './pages/MeiHuaDetail'
+import LiuYao from './pages/liuyao/LiuYao'
+import LiuYaoDetail from './pages/liuyao/LiuYaoDetail'
+import LiuYaoRecords from './pages/liuyao/LiuYaoRecords'
+import MeiHua from './pages/meihua/MeiHua'
+import MeiHuaDetail from './pages/meihua/MeiHuaDetail'
+import MeiHuaRecords from './pages/meihua/MeiHuaRecords'
 import Library from './pages/Library'
 import SettingsPage from './pages/Settings'
 
@@ -83,8 +85,10 @@ function App() {
           <Route path="/" element={<Dashboard />} />
           <Route path="/liuyao" element={<LiuYao />} />
           <Route path="/liuyao/detail" element={<LiuYaoDetail />} />
+          <Route path="/liuyao/records" element={<LiuYaoRecords />} />
           <Route path="/meihua" element={<MeiHua />} />
           <Route path="/meihua/detail" element={<MeiHuaDetail />} />
+          <Route path="/meihua/records" element={<MeiHuaRecords />} />
           <Route path="/library" element={<Library />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>

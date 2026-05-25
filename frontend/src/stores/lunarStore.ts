@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { FetchLunarData } from '../../wailsjs/go/main/App'
+import { FetchLunarData } from '../../wailsjs/go/zhanbu/App'
 
 interface LunarData {
   query_timestamp: string

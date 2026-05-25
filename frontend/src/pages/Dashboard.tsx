@@ -7,7 +7,7 @@ import {
   MoonOutlined,
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
-import useLunarStore from '../stores/lunarStore'
+import useLunarStore from '@/stores/lunarStore'
 
 const { Title, Text } = Typography
 
@@ -125,7 +125,7 @@ export default function Dashboard() {
                     </Space>
                     <Divider type="vertical" style={{ margin: '0 12px', borderColor: 'rgba(46, 46, 51, 0.2)' }} />
                     <Space size={4}>
-                      <Text style={{ fontSize: 16 }}>{zodiacIcons[lunarData.zodiac] || '🏮'}</Text>
+                      <Text style={{ fontSize: 16 }}>{zodiacIcons[lunarData.zodiac as keyof typeof zodiacIcons] || '🏮'}</Text>
                       <Tag color="red">{lunarData.zodiac}年</Tag>
                     </Space>
                   </Flex>

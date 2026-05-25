@@ -7,12 +7,12 @@ import {
 import { useMemo, useState, useRef, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toBlob } from 'html-to-image'
-import { SaveScreenshot } from '../../wailsjs/go/main/App'
-import YaoDisplay from '../components/YaoDisplay'
-import { guaMap, liuyaoGuaNames, guaPalaceInfo } from '../values/guaMap'
-import { LIU_SHI_SI_GUA } from '../values/liushisi-gua'
-import useLunarStore from '../stores/lunarStore'
-import guoxueData from '../assets/guoxue.json'
+import { SaveScreenshot } from '../../../wailsjs/go/zhanbu/App'
+import YaoDisplay from '@/components/YaoDisplay'
+import { guaMap, liuyaoGuaNames, guaPalaceInfo } from '@/values/guaMap'
+import { LIU_SHI_SI_GUA } from '@/values/liushisi-gua'
+import useLunarStore from '@/stores/lunarStore'
+import guoxueData from '@/assets/guoxue.json'
 
 function reconstructHexagram({ upperGua, lowerGua, movingDetails }: { upperGua: number, lowerGua: number, movingDetails: { position: number, type: number }[] }) {
   const upperBinary = upperGua === 8 ? 0 : 8 - upperGua
@@ -209,7 +209,6 @@ export default function LiuYaoDetail() {
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate('/liuyao')}
           />
-          <ThunderboltOutlined style={{ fontSize: 18 }} />
           <Typography.Title level={4} style={{ margin: 0 }}>
             排盘详情
           </Typography.Title>

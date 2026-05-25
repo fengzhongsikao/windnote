@@ -7,9 +7,9 @@ import {
 import { useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { toBlob } from 'html-to-image'
-import { SaveScreenshot } from '../../wailsjs/go/main/App'
-import { guaIndexMap, guaMap } from '../values/guaMap'
-import guoxueData from '../assets/guoxue.json'
+import { SaveScreenshot } from '../../../wailsjs/go/zhanbu/App'
+import { guaIndexMap, guaMap } from '@/values/guaMap'
+import guoxueData from '@/assets/guoxue.json'
 
 const guaNames = [
   '乾', '兑', '离', '震', '巽', '坎', '艮', '坤',
@@ -333,7 +333,6 @@ export default function MeiHuaDetail() {
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate('/meihua')}
           />
-          <DashboardOutlined style={{ fontSize: 18, color: '#7bc3db' }} />
           <Typography.Title level={3} style={{ color: '#2e2e33', margin: 0 }}>
             排盘详情
           </Typography.Title>

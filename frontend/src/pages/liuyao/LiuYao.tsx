@@ -2,11 +2,13 @@ import { Card, Button, Input, Select, Tabs, Flex, Typography } from 'antd'
 import {
   ThunderboltOutlined,
   SlidersOutlined,
+  HistoryOutlined,
 } from '@ant-design/icons'
 import { useState, useCallback } from 'react'
-import YaoDisplay from '../components/YaoDisplay'
+import YaoDisplay from '@/components/YaoDisplay'
 import { useNavigate } from 'react-router-dom'
-import { guaMap, liuyaoGuaNames } from '../values/guaMap'
+import { guaMap, liuyaoGuaNames } from '@/values/guaMap'
+import { SaveDivinationRecord } from '../../../wailsjs/go/zhanbu/App'
 
 
 function generateAutoLines() {
@@ -102,10 +104,26 @@ export default function LiuYao() {
     })
   }, [])
 
-  const handleCast = useCallback(() => {
+  const handleCast = useCallback(async () => {
     const rawLines = method === 'manual' ? manualLines : generateAutoLines()
     const result = computeHexagram(rawLines)
-    
+
+    const record = {
+      id: Date.now().toString(),
+      upperGua: result.upperGua,
+      lowerGua: result.lowerGua,
+      movingDetails: result.movingDetails,
+      method,
+      question,
+      createdAt: new Date().toISOString(),
+    }
+
+    try {
+      await SaveDivinationRecord(JSON.stringify(record))
+    } catch (err) {
+      console.error('保存排盘记录失败:', err)
+    }
+
     navigate('/liuyao/detail', {
       state: {
         upperGua: result.upperGua,
@@ -218,7 +236,6 @@ export default function LiuYao() {
   return (
     <div style={{ padding: 32, maxWidth: 1024, margin: '0 auto' }}>
       <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
-        <ThunderboltOutlined style={{ fontSize: 18, color: '#7bc3db' }} />
         <Typography.Title level={4} style={{ marginBottom: 0, color: '#2e2e33' }}>
           六爻起卦
         </Typography.Title>
@@ -246,6 +263,16 @@ export default function LiuYao() {
             style={{ width: '100%' }}
           >
             开始排盘
+          </Button>
+
+          <Button
+            type="default"
+            size="large"
+            icon={<HistoryOutlined />}
+            onClick={() => navigate('/liuyao/records')}
+            style={{ width: '100%' }}
+          >
+            排盘记录
           </Button>
         </Flex>
       </Card>

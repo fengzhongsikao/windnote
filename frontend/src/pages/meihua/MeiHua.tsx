@@ -3,10 +3,12 @@ import {
   DashboardOutlined,
   SlidersOutlined,
   ThunderboltOutlined,
+  HistoryOutlined,
 } from '@ant-design/icons'
 import { useState, useCallback } from 'react'
-import YaoDisplay from '../components/YaoDisplay'
+import YaoDisplay from '@/components/YaoDisplay'
 import { useNavigate } from 'react-router-dom'
+import { SaveMeihuaRecord } from '../../../wailsjs/go/zhanbu/App'
 
 function toGuaNum(n: number) {
   const r = n % 8
@@ -92,9 +94,26 @@ export default function MeiHua() {
     })
   }, [])
 
-  const handleCast = useCallback(() => {
+  const handleCast = useCallback(async () => {
     const res = generateMeihua(method, numberValue, method === 'manual' ? manualLines : null, movingYao, movingWithShichen)
-    console.log(res);
+
+    const record = {
+      id: Date.now().toString(),
+      upperNum: res.upperNum,
+      lowerNum: res.lowerNum,
+      movingYao: res.moving,
+      method,
+      question,
+      manualLines: method === 'manual' ? manualLines : undefined,
+      createdAt: new Date().toISOString(),
+    }
+
+    try {
+      await SaveMeihuaRecord(JSON.stringify(record))
+    } catch (err) {
+      console.error('保存梅花排盘记录失败:', err)
+    }
+
     navigate('/meihua/detail', {
       state: {
         upperNum: res.upperNum,
@@ -103,7 +122,7 @@ export default function MeiHua() {
         movingYao: res.moving,
       },
     })
-  }, [method, numberValue, manualLines, movingYao, movingWithShichen, navigate])
+  }, [method, numberValue, manualLines, movingYao, movingWithShichen, question, navigate])
 
   const tabItems = [
     {
@@ -220,7 +239,6 @@ export default function MeiHua() {
   return (
     <div style={{ padding: 32, maxWidth: 1024, margin: '0 auto' }}>
       <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
-        <DashboardOutlined style={{ fontSize: 18, color: '#7bc3db' }} />
         <Typography.Title level={4} style={{ marginBottom: 0, color: '#2e2e33' }}>
           梅花易数
         </Typography.Title>
@@ -249,6 +267,16 @@ export default function MeiHua() {
             style={{ width: '100%' }}
           >
             开始排盘
+          </Button>
+
+          <Button
+            type="default"
+            size="large"
+            icon={<HistoryOutlined />}
+            onClick={() => navigate('/meihua/records')}
+            style={{ width: '100%' }}
+          >
+            排盘记录
           </Button>
         </Flex>
       </Card>

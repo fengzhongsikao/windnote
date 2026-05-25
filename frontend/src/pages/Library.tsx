@@ -1,7 +1,7 @@
 import { Card, Input, Tabs, Tag, Collapse } from 'antd'
 import { SearchOutlined, BookOutlined } from '@ant-design/icons'
 import { useState, useMemo } from 'react'
-import guoxueData from '../assets/guoxue.json'
+import guoxueData from '@/assets/guoxue.json'
 
 const guaData = guoxueData.map((item, index) => {
   const quan = item.quan

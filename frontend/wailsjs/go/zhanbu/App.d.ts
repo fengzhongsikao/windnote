@@ -7,6 +7,14 @@ export function GetAppVersion():Promise<string>;
 
 export function GetDefaultSavePath():Promise<string>;
 
+export function GetDivinationRecords():Promise<string>;
+
+export function GetMeihuaRecords():Promise<string>;
+
 export function Greet(arg1:string):Promise<string>;
+
+export function SaveDivinationRecord(arg1:string):Promise<void>;
+
+export function SaveMeihuaRecord(arg1:string):Promise<void>;
 
 export function SaveScreenshot(arg1:string,arg2:string):Promise<string>;
