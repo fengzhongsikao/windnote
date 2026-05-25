@@ -10,7 +10,7 @@ const root = createRoot(container)
 
 root.render(
   <React.StrictMode>
-    <ConfigProvider>
+    <ConfigProvider theme={{ token: { fontFamily: '\'LXGWWenKai\', \'Noto Serif SC\', serif' } }}>
       <HashRouter>
         <App />
       </HashRouter>
