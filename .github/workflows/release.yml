@@ -74,6 +74,11 @@ jobs:
           sed -i '' "s/return \"[0-9.]*\"/return \"$VERSION\"/" zhanbu/app.go || \
           sed -i "s/return \"[0-9.]*\"/return \"$VERSION\"/" zhanbu/app.go
 
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Build
         run: wails build -platform ${{ matrix.platform }} -tags ${{ matrix.build_tags }} -clean
 
