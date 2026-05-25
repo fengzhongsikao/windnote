@@ -1,4 +1,4 @@
-export const guaMap=[
+export const guaMap: Record<string, number>[] = [
     { 1: 1 }, //1
     { 8: 8 }, //2
     { 6: 4 }, //3
@@ -66,7 +66,7 @@ export const guaMap=[
 ];
 
 
-export const guaIndexMap= {
+export const guaIndexMap: Record<string, string> = {
     "1-1": "乾",
     "8-8": "坤",
     "6-4": "屯",

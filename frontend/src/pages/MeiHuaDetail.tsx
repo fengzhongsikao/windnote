@@ -15,7 +15,7 @@ const guaNames = [
   '乾', '兑', '离', '震', '巽', '坎', '艮', '坤',
 ]
 
-const trigramElements = {
+const trigramElements: Record<number, string> = {
   1: '天',
   2: '泽',
   3: '火',
@@ -26,12 +26,12 @@ const trigramElements = {
   8: '地',
 }
 
-function getGuaFromNumber(n) {
+function getGuaFromNumber(n: number) {
   const idx = ((n - 1) % 8 + 8) % 8
   return { name: guaNames[idx], index: idx }
 }
 
-function getHexagramDisplayName(upperNum, lowerNum) {
+function getHexagramDisplayName(upperNum: number, lowerNum: number) {
   const key = `${upperNum}-${lowerNum}`
   const name = guaIndexMap[key]
   if (!name) return null
@@ -48,12 +48,12 @@ function getHexagramDisplayName(upperNum, lowerNum) {
   return `${upperElement}${lowerElement}${name}`
 }
 
-function trigramIndexToBits(index) {
+function trigramIndexToBits(index: number) {
   const val = 7 - index
   return [val & 1, (val >> 1) & 1, (val >> 2) & 1]
 }
 
-function linesToHexagram(lines) {
+function linesToHexagram(lines: number[]) {
   const lowerVal = lines[0] * 4 + lines[1] * 2 + lines[2] * 1
   const upperVal = lines[3] * 4 + lines[4] * 2 + lines[5] * 1
   const lowerIdx = 7 - lowerVal
@@ -73,7 +73,7 @@ function linesToHexagram(lines) {
   }
 }
 
-function getHexagramIndex(upperNum, lowerNum) {
+function getHexagramIndex(upperNum: number, lowerNum: number) {
   for (let i = 0; i < guaMap.length; i++) {
     const entry = guaMap[i]
     const key = Object.keys(entry)[0]
@@ -84,7 +84,7 @@ function getHexagramIndex(upperNum, lowerNum) {
   return -1
 }
 
-function YaoLine({ type, isRed }) {
+function YaoLine({ type, isRed }: { type: number, isRed: boolean }) {
   const isYang = type === 1
   const bgColor = isRed ? '#ff0008ff' : '#000000ff'
   return (
@@ -101,7 +101,7 @@ function YaoLine({ type, isRed }) {
   )
 }
 
-function TiYongLabels({ movingYao }) {
+function TiYongLabels({ movingYao }: { movingYao: number | null | undefined }) {
   if (movingYao == null) return null
 
   const getLabels = () => {
@@ -113,7 +113,7 @@ function TiYongLabels({ movingYao }) {
 
   const { upper, lower } = getLabels()
 
-  const labelStyle = {
+  const labelStyle: React.CSSProperties = {
     fontSize: 14,
     color: '#2e2e33',
     width: 16,
@@ -133,7 +133,15 @@ function TiYongLabels({ movingYao }) {
   )
 }
 
-function HexagramCard({ title, hexagram, highlightMoving, movingYao, isMain }) {
+interface HexagramCardProps {
+  title: string
+  hexagram: { name: string; simpleName?: string; upper?: { name: string; index: number }; lower?: { name: string; index: number }; lines: number[] } | null | undefined
+  highlightMoving?: boolean
+  movingYao?: number
+  isMain?: boolean
+}
+
+function HexagramCard({ title, hexagram, highlightMoving, movingYao, isMain }: HexagramCardProps) {
   if (!hexagram) return null
   const lines = hexagram.lines || []
   const hasMoving = highlightMoving && movingYao != null
@@ -142,9 +150,9 @@ function HexagramCard({ title, hexagram, highlightMoving, movingYao, isMain }) {
   const upperGroup = displayLines.slice(0, 3)
   const lowerGroup = displayLines.slice(3, 6)
 
-  const renderLine = (line, lineIndexFromBottom) => {
+  const renderLine = (line: number, lineIndexFromBottom: number) => {
     const isMovingLine = hasMoving && movingYao === lineIndexFromBottom + 1
-    return <YaoLine type={line} isRed={isMovingLine && isMain} />
+    return <YaoLine type={line} isRed={!!(isMovingLine && isMain)} />
   }
 
   return (
@@ -177,7 +185,7 @@ function HexagramCard({ title, hexagram, highlightMoving, movingYao, isMain }) {
   )
 }
 
-function HexagramCardMain({ title, hexagram, highlightMoving, movingYao, isMain }) {
+function HexagramCardMain({ title, hexagram, highlightMoving, movingYao, isMain }: HexagramCardProps) {
   if (!hexagram) return null
   const lines = hexagram.lines || []
   const hasMoving = highlightMoving && movingYao != null
@@ -186,14 +194,14 @@ function HexagramCardMain({ title, hexagram, highlightMoving, movingYao, isMain 
   const upperGroup = displayLines.slice(0, 3)
   const lowerGroup = displayLines.slice(3, 6)
 
-  const renderLine = (line, lineIndexFromBottom) => {
+  const renderLine = (line: number, lineIndexFromBottom: number) => {
     const isMovingLine = hasMoving && movingYao === lineIndexFromBottom + 1
-    return <YaoLine type={line} isRed={isMovingLine && isMain} />
+    return <YaoLine type={line} isRed={!!(isMovingLine && isMain)} />
   }
 
   return (
     <Card>
-      <Flex horizontal align="end">
+      <Flex align="end">
          <TiYongLabels movingYao={movingYao} />
          <Flex vertical align="center">
         <Flex justify="center" align="center" gap={8} style={{ marginBottom: 12 }}>
@@ -246,6 +254,7 @@ export default function MeiHuaDetail() {
       reader.readAsDataURL(blob)
       reader.onload = async () => {
         const dataUrl = reader.result
+        if (typeof dataUrl !== 'string') return
         const filename = `梅花排盘-${mainGua?.name || 'unknown'}.png`
         const savePath = await SaveScreenshot(filename, dataUrl)
         if (savePath) {
@@ -345,7 +354,7 @@ export default function MeiHuaDetail() {
           </Typography.Title>
 
           <Row gutter={[12, 12]}>
-            <Col xs={24} sm={12} md={8} lg={{ flex: '0 0 20%', maxWidth: '20%' }}>
+            <Col xs={24} sm={12} md={8} lg={{ flex: '0 0 20%' }}>
               <Flex align="stretch" justify="center">
                 <div style={{ flex: 1 }}>
                   <HexagramCardMain
@@ -363,13 +372,13 @@ export default function MeiHuaDetail() {
                 </div>
               </Flex>
             </Col>
-            <Col xs={24} sm={12} md={8} lg={{ flex: '0 0 20%', maxWidth: '20%' }}>
+            <Col xs={24} sm={12} md={8} lg={{ flex: '0 0 20%' }}>
               <HexagramCard
                 title="「 互卦 」"
                 hexagram={huGua}
               />
             </Col>
-            <Col xs={24} sm={12} md={8} lg={{ flex: '0 0 20%', maxWidth: '20%' }}>
+            <Col xs={24} sm={12} md={8} lg={{ flex: '0 0 20%' }}>
               <HexagramCard
                 title="「 变卦 」"
                 hexagram={changeGua}
@@ -377,13 +386,13 @@ export default function MeiHuaDetail() {
                 movingYao={movingYao}
               />
             </Col>
-            <Col xs={24} sm={12} md={8} lg={{ flex: '0 0 20%', maxWidth: '20%' }}>
+            <Col xs={24} sm={12} md={8} lg={{ flex: '0 0 20%' }}>
               <HexagramCard
                 title="「 错卦 」"
                 hexagram={cuoGua}
               />
             </Col>
-            <Col xs={24} sm={12} md={8} lg={{ flex: '0 0 20%', maxWidth: '20%' }}>
+            <Col xs={24} sm={12} md={8} lg={{ flex: '0 0 20%' }}>
               <HexagramCard
                 title="「 综卦 」"
                 hexagram={zongGua}

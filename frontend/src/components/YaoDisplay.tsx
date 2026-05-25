@@ -1,4 +1,4 @@
-export default function YaoDisplay({ type, showMoving = true }) {
+export default function YaoDisplay({ type, showMoving = true }: { type: number; showMoving?: boolean }) {
   const isYang = type === 1 || type === 3
   return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>

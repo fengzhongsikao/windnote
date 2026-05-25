@@ -2,9 +2,9 @@
   "$schema": "https://wails.io/schemas/config.v2.json",
   "name": "windnote",
   "outputfilename": "windnote",
-  "frontend:install": "deno install",
-  "frontend:build": "deno run build",
-  "frontend:dev:watcher": "deno run dev",
+  "frontend:install": "bun install",
+  "frontend:build": "bun run build",
+  "frontend:dev:watcher": "bun run dev",
   "frontend:dev:serverUrl": "auto",
   "author": {
     "name": "windnote",

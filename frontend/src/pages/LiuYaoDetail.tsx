@@ -14,7 +14,7 @@ import { LIU_SHI_SI_GUA } from '../values/liushisi-gua'
 import useLunarStore from '../stores/lunarStore'
 import guoxueData from '../assets/guoxue.json'
 
-function reconstructHexagram({ upperGua, lowerGua, movingDetails }) {
+function reconstructHexagram({ upperGua, lowerGua, movingDetails }: { upperGua: number, lowerGua: number, movingDetails: { position: number, type: number }[] }) {
   const upperBinary = upperGua === 8 ? 0 : 8 - upperGua
   const lowerBinary = lowerGua === 8 ? 0 : 8 - lowerGua
 
@@ -60,7 +60,7 @@ function reconstructHexagram({ upperGua, lowerGua, movingDetails }) {
   const changeUpperGua = changeUpper === 0 ? 8 : 8 - changeUpper
   const changeLowerGua = changeLower === 0 ? 8 : 8 - changeLower
 
-  const findGuaName = (upper, lower) => {
+  const findGuaName = (upper: number, lower: number) => {
     const idx = guaMap.findIndex(item => {
       const key = Object.keys(item)[0]
       return Number(key) === upper && item[key] === lower
@@ -85,7 +85,7 @@ function reconstructHexagram({ upperGua, lowerGua, movingDetails }) {
 const LIU_CHONG_GUA = ['乾为天', '兑为泽', '离为火', '震为雷', '巽为风', '坎为水', '艮为山', '坤为地', '天雷无妄', '雷天大壮']
 const LIU_HE_GUA = ['天地否', '地天泰', '泽水困', '雷地豫', '山火贲', '火山旅', '水泽节', '地雷复']
 
-function getGuaLiuType(guaName) {
+function getGuaLiuType(guaName: string | null | undefined) {
   if (!guaName) return null
   if (LIU_CHONG_GUA.includes(guaName)) return '六冲'
   if (LIU_HE_GUA.includes(guaName)) return '六合'
@@ -97,12 +97,13 @@ export default function LiuYaoDetail() {
   const location = useLocation()
   const { upperGua, lowerGua, movingDetails, question } = location.state || {}
 
-  const { ganzhiDay } = useLunarStore()
+  const { lunarData } = useLunarStore()
+  const ganzhiDay = lunarData?.ganzhi_day
 
   const liuShen = useMemo(() => {
     if (!ganzhiDay) return []
     const tianGan = ganzhiDay.charAt(0)
-    const map = {
+    const map: Record<string, string[]> = {
       '甲': ['青龙', '朱雀', '勾陈', '腾蛇', '白虎', '玄武'],
       '乙': ['青龙', '朱雀', '勾陈', '腾蛇', '白虎', '玄武'],
       '丙': ['朱雀', '勾陈', '腾蛇', '白虎', '玄武', '青龙'],
@@ -160,6 +161,7 @@ export default function LiuYaoDetail() {
       reader.readAsDataURL(blob)
       reader.onload = async () => {
         const dataUrl = reader.result
+        if (typeof dataUrl !== 'string') return
         const filename = `六爻排盘-${hexagram?.mainGua || 'unknown'}.png`
         const savePath = await SaveScreenshot(filename, dataUrl)
         if (savePath) {
