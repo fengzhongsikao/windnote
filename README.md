@@ -48,7 +48,6 @@
 | [@ant-design/icons](https://github.com/ant-design/ant-design-icons) | 图标集 |
 | [Zustand](https://github.com/pmndrs/zustand) | 轻量状态管理 |
 | [Vite 5](https://vitejs.dev/) | 前端构建工具 |
-| [Tailwind CSS 3](https://tailwindcss.com/) | 原子化 CSS |
 | [Framer Motion](https://www.framer.com/motion/) | 页面动画 |
 | [html-to-image](https://github.com/bubkoo/html-to-image) | 卦象截图导出 |
 

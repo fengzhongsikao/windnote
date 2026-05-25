@@ -9,5 +9,8 @@
   "author": {
     "name": "windnote",
     "email": "boltjolt@qq.com"
+  },
+  "info": {
+    "productVersion": "1.0.2"
   }
 }
