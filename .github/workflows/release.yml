@@ -71,8 +71,8 @@ jobs:
         run: |
           VERSION=$(node -e "console.log(require('./wails.json').info.productVersion)")
           echo "Release version: $VERSION"
-          sed -i '' "s/return \"[0-9.]*\"/return \"$VERSION\"/" app.go || \
-          sed -i "s/return \"[0-9.]*\"/return \"$VERSION\"/" app.go
+          sed -i '' "s/return \"[0-9.]*\"/return \"$VERSION\"/" zhanbu/app.go || \
+          sed -i "s/return \"[0-9.]*\"/return \"$VERSION\"/" zhanbu/app.go
 
       - name: Build
         run: wails build -platform ${{ matrix.platform }} -tags ${{ matrix.build_tags }} -clean
