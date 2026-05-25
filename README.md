@@ -60,7 +60,7 @@
 ### 前置要求
 - Go 1.26.3
 - [Wails CLI](https://wails.io/docs/gettingstarted/installation)
-- [Deno](https://deno.com/)（本项目使用 Deno 管理前端依赖）
+- [Bun](https://bun.sh/)（本项目使用 Bun 管理前端依赖）
 
 ### 安装
 
@@ -73,7 +73,7 @@ go install github.com/wailsapp/wails/v2/cmd/wails@latest
 
 ```bash
 # 开发模式（热重载）
-# Wails 会自动执行 deno install 并启动 Vite 开发服务器
+# Wails 会自动执行 bun install 并启动 Vite 开发服务器
 wails dev
 ```
 
@@ -81,7 +81,7 @@ wails dev
 
 ```bash
 # 构建当前平台的生产版本
-# Wails 会自动：deno install → vite build → go build → 嵌入前端资源
+# Wails 会自动：bun install → vite build → go build → 嵌入前端资源
 wails build -clean
 ```
 
@@ -93,15 +93,15 @@ wails build -clean
 
 ```bash
 cd frontend
-deno install
-deno run build     # 生成 frontend/dist/
+bun install
+bun run build     # 生成 frontend/dist/
 ```
 
 ### 开发架构
 
 ```
 wails dev
-  ├── deno install           ← 安装前端依赖
+  ├── bun install           ← 安装前端依赖
   ├── vite dev server        ← 前端热重载（端口 34115）
   └── go build → wails run   ← Go 后端（与前端通过 Wails Bind 通信）
 ```
