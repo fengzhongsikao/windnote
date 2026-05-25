@@ -22,6 +22,9 @@ const guaData = guoxueData.map((item, index) => {
 export default function Library() {
   const [search, setSearch] = useState('')
 
+  const upperGua = guaData.slice(0, 30)
+  const lowerGua = guaData.slice(30)
+
   const filtered = useMemo(() =>
     guaData.filter(
       (g) =>
@@ -32,56 +35,60 @@ export default function Library() {
     [search]
   )
 
+  function GuaCardList({ list }: { list: typeof guaData }) {
+    return (
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: 16, marginTop: 16 }}>
+        {list.map((gua) => (
+          <Card
+            key={gua.number}
+            hoverable
+            style={{ backgroundColor: '#f5f1ee', borderColor: 'rgba(46, 46, 51, 0.1)' }}
+          >
+            <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
+              <div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: '#2e2e33' }}>{gua.name}</div>
+                <div style={{ fontSize: 24, margin: '4px 0' }}>{gua.symbol}</div>
+              </div>
+              <Tag color="warning">第 {gua.number} 卦</Tag>
+            </div>
+            <p style={{ fontSize: 14, marginBottom: 12, color: 'rgba(46, 46, 51, 0.6)' }}>{gua.meaning}</p>
+            <Collapse
+              ghost
+              items={[
+                {
+                  key: 'yao',
+                  label: '查看爻辞',
+                  children: (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 14, color: 'rgba(46, 46, 51, 0.6)' }}>
+                      {gua.quan.map((y, i) => (
+                        <p key={i} style={{ margin: 0 }}>{y}</p>
+                      ))}
+                    </div>
+                  ),
+                },
+              ]}
+            />
+          </Card>
+        ))}
+      </div>
+    )
+  }
+
   const tabItems = [
     {
       key: 'all',
       label: '全部',
-      children: (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(400px, 1fr))', gap: 16, marginTop: 16 }}>
-          {filtered.map((gua) => (
-            <Card
-              key={gua.number}
-              hoverable
-              style={{ backgroundColor: '#f5f1ee', borderColor: 'rgba(46, 46, 51, 0.1)' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
-                <div>
-                  <div style={{ fontSize: 18, fontWeight: 700, color: '#2e2e33' }}>{gua.name}</div>
-                  <div style={{ fontSize: 24, margin: '4px 0' }}>{gua.symbol}</div>
-                </div>
-                <Tag color="warning">第 {gua.number} 卦</Tag>
-              </div>
-              <p style={{ fontSize: 14, marginBottom: 12, color: 'rgba(46, 46, 51, 0.6)' }}>{gua.meaning}</p>
-              <Collapse
-                ghost
-                items={[
-                  {
-                    key: 'yao',
-                    label: '查看爻辞',
-                    children: (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 14, color: 'rgba(46, 46, 51, 0.6)' }}>
-                        {gua.quan.map((y, i) => (
-                          <p key={i} style={{ margin: 0 }}>{y}</p>
-                        ))}
-                      </div>
-                    ),
-                  },
-                ]}
-              />
-            </Card>
-          ))}
-        </div>
-      ),
+      children: <GuaCardList list={filtered} />,
     },
     {
       key: 'upper',
       label: '上经',
-      children: <div style={{ marginTop: 16, color: 'rgba(46, 46, 51, 0.6)' }}>上经三十卦，展示前十六卦</div>,
+      children: <GuaCardList list={upperGua} />,
     },
     {
       key: 'lower',
       label: '下经',
-      children: <div style={{ marginTop: 16, color: 'rgba(46, 46, 51, 0.6)' }}>下经三十四卦</div>,
+      children: <GuaCardList list={lowerGua} />,
     },
   ]
 
