@@ -114,7 +114,6 @@ export default function MeiHuaRecords() {
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate('/meihua')}
           />
-          <HistoryOutlined style={{ fontSize: 18, color: '#7bc3db' }} />
           <Typography.Title level={4} style={{ marginBottom: 0, color: '#2e2e33' }}>
             排盘记录
           </Typography.Title>
