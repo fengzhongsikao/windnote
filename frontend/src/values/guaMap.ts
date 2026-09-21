@@ -1,3 +1,4 @@
+// 六十四卦卦序歌对应的卦序 乾1 兑2 离3 震4 巽5 坎6 艮7 坤8
 export const guaMap: Record<string, number>[] = [
     { 1: 1 }, //1
     { 8: 8 }, //2
@@ -66,6 +67,7 @@ export const guaMap: Record<string, number>[] = [
 ];
 
 
+// 六十四卦卦序歌对应的卦序 乾1 兑2 离3 震4 巽5 坎6 艮7 坤8
 export const guaIndexMap: Record<string, string> = {
     "1-1": "乾",
     "8-8": "坤",
@@ -132,7 +134,7 @@ export const guaIndexMap: Record<string, string> = {
     "6-3": "既济",
     "3-6": "未济"
 };
-
+// 六十四卦卦序歌
 export const liuyaoGuaNames = [
   '乾为天', '坤为地', '水雷屯', '山水蒙', '水天需', '天水讼', '地水师', '水地比',
   '风天小畜', '天泽履', '地天泰', '天地否', '天火同人', '火天大有', '地山谦', '雷地豫',
@@ -212,6 +214,7 @@ export const guaPalaceInfo = [
   { palace: '离', soulType: null },    // 63: 火水未济
 ]
 
+// 64卦数据 从上到下 阳爻为 1 阴爻为 0
 export const hexagramData = {
     '111111': '乾为天',
     '000000': '坤为地',

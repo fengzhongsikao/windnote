@@ -241,7 +241,7 @@ export default function LiuYao() {
         </Typography.Title>
       </Flex>
 
-      <Card style={{ marginBottom: 24, backgroundColor: '#f5f1ee', borderColor: 'rgba(46, 46, 51, 0.1)' }}>
+      <Card style={{ marginBottom: 24, backgroundColor: '#D4E4DF', borderColor: 'rgba(46, 46, 51, 0.1)' }}>
         <Flex vertical gap={16}>
           <Input.TextArea
             placeholder="请诚心默念你所问之事..."

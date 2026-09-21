@@ -1,8 +1,6 @@
 import { useEffect } from 'react'
 import { Card, Button, Typography, Row, Col, Flex, Divider, Space, Tag, Skeleton } from 'antd'
 import {
-  ThunderboltOutlined,
-  CalendarOutlined,
   SunOutlined,
   MoonOutlined,
 } from '@ant-design/icons'
@@ -11,11 +9,6 @@ import useLunarStore from '@/stores/lunarStore'
 
 const { Title, Text } = Typography
 
-const zodiacIcons = {
-  '鼠': '🐭', '牛': '🐮', '虎': '🐯', '兔': '🐰',
-  '龙': '🐲', '蛇': '🐍', '马': '🐴', '羊': '🐑',
-  '猴': '🐵', '鸡': '🐔', '狗': '🐶', '猪': '🐷',
-}
 
 const colors = {
   qing: '#7bc3db',
@@ -39,19 +32,18 @@ export default function Dashboard() {
         <Title level={3} style={{ marginBottom: 8, background: 'linear-gradient(to right, #0dc2b3, #f5222d)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
           风筮
         </Title>
-        <Text type="secondary">心诚则灵，遇事不决问东风</Text>
+        <Text type="secondary">心诚则灵,遇事不决,可问春风</Text>
       </Flex>
 
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={12} xl={8}>
           <Card
-            style={{ backgroundColor: 'rgba(243, 215, 105, 0.1)', borderColor: 'rgba(46, 46, 51, 0.1)', overflow: 'hidden' }}
+            style={{ backgroundColor: '#fff', overflow: 'hidden' }}
             styles={{ body: { padding: 0 } }}
           >
             <div style={{ padding: 16 }}>
               <Flex align="center" gap={8} style={{ marginBottom: 12 }}>
-                <CalendarOutlined style={{ color: colors.qing }} />
-                <Text strong style={{ color: 'rgba(46, 46, 51, 0.7)' }}>今日黄历</Text>
+                <Text strong style={{ color: '#fff' }}>今日黄历</Text>
               </Flex>
               <div style={{ textAlign: 'center', marginBottom: 16 }}>
                 <Title level={4} style={{ marginBottom: 4, color: colors.hei }}>{dateStr}</Title>
@@ -68,7 +60,7 @@ export default function Dashboard() {
 
               {!loading && lunarData && (
                 <Flex vertical gap={16}>
-                  <div style={{ background: 'linear-gradient(to bottom right, rgba(123, 195, 219, 0.1), #ede8e4)', borderRadius: 8, padding: '12px 16px', textAlign: 'center', border: '1px solid rgba(123, 195, 219, 0.2)' }}>
+                  <div style={{ background: 'rgba(123, 195, 219, 0.1)', borderRadius: 8, padding: '12px 16px', textAlign: 'center', border: '1px solid rgba(123, 195, 219, 0.2)' }}>
                     <Text type="secondary" style={{ fontSize: 12, marginBottom: 4, display: 'block', letterSpacing: '0.2em' }}>
                       农 历
                     </Text>
@@ -125,7 +117,6 @@ export default function Dashboard() {
                     </Space>
                     <Divider type="vertical" style={{ margin: '0 12px', borderColor: 'rgba(46, 46, 51, 0.2)' }} />
                     <Space size={4}>
-                      <Text style={{ fontSize: 16 }}>{zodiacIcons[lunarData.zodiac as keyof typeof zodiacIcons] || '🏮'}</Text>
                       <Tag color="red">{lunarData.zodiac}年</Tag>
                     </Space>
                   </Flex>
@@ -142,9 +133,8 @@ export default function Dashboard() {
         </Col>
 
         <Col xs={24} lg={12} xl={16}>
-          <Card style={{ height: '100%', background: 'linear-gradient(to bottom right, rgba(106, 179, 203, 0.1), rgba(174, 49, 54, 0.1))', borderColor: 'rgba(123, 195, 219, 0.2)' }}>
+          <Card style={{ height: '100%', background: '#fff' }}>
             <Flex vertical justify="center" align="center" style={{ padding: '32px 0', textAlign: 'center' }}>
-              <ThunderboltOutlined style={{ fontSize: 24, marginBottom: 12, color: colors.qing }} />
               <Title level={4} style={{ marginBottom: 8, color: colors.hei }}>立即起卦</Title>
               <Text type="secondary" style={{ marginBottom: 16 }}>心有所疑，卦象自知</Text>
               <Space size={12}>

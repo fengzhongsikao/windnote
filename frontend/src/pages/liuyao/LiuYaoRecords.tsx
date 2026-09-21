@@ -1,13 +1,13 @@
-import { List, Button, Typography, Flex, Tag, Empty } from 'antd'
+import { List, Button, Typography, Flex, Tag, Empty, Modal, message } from 'antd'
 import {
   ThunderboltOutlined,
   ArrowLeftOutlined,
   ClockCircleOutlined,
-  HistoryOutlined,
+  DeleteOutlined,
 } from '@ant-design/icons'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type MouseEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { GetDivinationRecords } from '../../../wailsjs/go/zhanbu/App'
+import { DeleteDivinationRecord, GetDivinationRecords } from '../../../wailsjs/go/zhanbu/App'
 import { guaMap, liuyaoGuaNames } from '@/values/guaMap'
 
 const singleGuaNames: Record<number, string> = {
@@ -93,6 +93,22 @@ export default function LiuYaoRecords() {
     })
   }
 
+  const handleDelete = (e: MouseEvent, record: DivinationRecord) => {
+    e.stopPropagation()
+    Modal.confirm({
+      title: '删除这条排盘记录？',
+      content: '删除后无法恢复',
+      okText: '删除',
+      okType: 'danger',
+      cancelText: '取消',
+      onOk: async () => {
+        await DeleteDivinationRecord(record.id)
+        setRecords(prev => prev.filter(item => item.id !== record.id))
+        message.success('已删除')
+      },
+    })
+  }
+
   return (
     <div style={{ padding: 32, maxWidth: 1024, margin: '0 auto' }}>
       <Flex align="center" justify="space-between" style={{ marginBottom: 24 }}>
@@ -152,9 +168,18 @@ export default function LiuYaoRecords() {
                         {guaName}
                       </Typography.Text>
                     </Flex>
-                    <Tag color={record.method === 'auto' ? 'blue' : 'green'}>
-                      {methodLabels[record.method] || record.method}
-                    </Tag>
+                    <Flex align="center" gap={8}>
+                      <Tag color={record.method === 'auto' ? 'blue' : 'green'}>
+                        {methodLabels[record.method] || record.method}
+                      </Tag>
+                      <Button
+                        type="text"
+                        danger
+                        size="small"
+                        icon={<DeleteOutlined />}
+                        onClick={(e) => handleDelete(e, record)}
+                      />
+                    </Flex>
                   </Flex>
 
                   <Flex gap={24} wrap="wrap">

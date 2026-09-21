@@ -1,6 +1,5 @@
 import { Card, Button, Flex, Typography, Row, Col, message } from 'antd'
 import {
-  DashboardOutlined,
   ArrowLeftOutlined,
   DownloadOutlined,
 } from '@ant-design/icons'
@@ -270,7 +269,6 @@ export default function MeiHuaDetail() {
     return (
       <div style={{ padding: 32, maxWidth: 1060, margin: '0 auto' }}>
         <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
-          <DashboardOutlined style={{ fontSize: 18, color: '#7bc3db' }} />
           <Typography.Title level={3} style={{ color: '#2e2e33', margin: 0 }}>
             梅花易数
           </Typography.Title>

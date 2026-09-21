@@ -122,3 +122,49 @@ func (a *App) GetMeihuaRecords() (string, error) {
 	}
 	return string(result), nil
 }
+
+func (a *App) DeleteDivinationRecord(id string) error {
+	filePath := a.getRecordsFilePath()
+
+	var records []DivinationRecord
+	if data, err := os.ReadFile(filePath); err == nil {
+		json.Unmarshal(data, &records)
+	}
+
+	filtered := make([]DivinationRecord, 0, len(records))
+	for _, record := range records {
+		if record.ID != id {
+			filtered = append(filtered, record)
+		}
+	}
+
+	data, err := json.MarshalIndent(filtered, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal records: %w", err)
+	}
+
+	return os.WriteFile(filePath, data, 0644)
+}
+
+func (a *App) DeleteMeihuaRecord(id string) error {
+	filePath := a.getMeihuaRecordsFilePath()
+
+	var records []MeihuaRecord
+	if data, err := os.ReadFile(filePath); err == nil {
+		json.Unmarshal(data, &records)
+	}
+
+	filtered := make([]MeihuaRecord, 0, len(records))
+	for _, record := range records {
+		if record.ID != id {
+			filtered = append(filtered, record)
+		}
+	}
+
+	data, err := json.MarshalIndent(filtered, "", "  ")
+	if err != nil {
+		return fmt.Errorf("failed to marshal records: %w", err)
+	}
+
+	return os.WriteFile(filePath, data, 0644)
+}

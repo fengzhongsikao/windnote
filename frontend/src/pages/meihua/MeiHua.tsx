@@ -1,10 +1,4 @@
 import { Card, Button, Input, Select, Tabs, Radio, Flex, InputNumber, Checkbox, Typography } from 'antd'
-import {
-  DashboardOutlined,
-  SlidersOutlined,
-  ThunderboltOutlined,
-  HistoryOutlined,
-} from '@ant-design/icons'
 import { useState, useCallback } from 'react'
 import YaoDisplay from '@/components/YaoDisplay'
 import { useNavigate } from 'react-router-dom'
@@ -127,7 +121,7 @@ export default function MeiHua() {
   const tabItems = [
     {
       key: 'manual',
-      label: <span><SlidersOutlined /> 手动指定</span>,
+      label: <span>手动指定</span>,
       children: (
         <div style={{ marginTop: 16 }}>
           <Flex style={{ marginBottom: 12 }} gap={40}>
@@ -192,7 +186,7 @@ export default function MeiHua() {
     },
     {
       key: 'number',
-      label: <span><DashboardOutlined /> 数字起卦</span>,
+      label: <span>数字起卦</span>,
       children: (
         <div style={{ marginTop: 16 }}>
           <Typography.Paragraph style={{ marginBottom: 16, color: 'rgba(46, 46, 51, 0.6)' }}>
@@ -216,14 +210,13 @@ export default function MeiHua() {
     },
     {
       key: 'auto',
-      label: <span><ThunderboltOutlined /> 自动起卦</span>,
+      label: <span>自动起卦</span>,
       children: (
         <div style={{ marginTop: 16 }}>
           <Typography.Paragraph style={{ marginBottom: 16, color: 'rgba(46, 46, 51, 0.6)' }}>
             假尔泰筮有常，假尔泰筮有常，某官姓名，今以某事云云，未知可否？爰质所疑于神灵，吉凶得失、悔吝忧虞，惟尔有神，尚明告之。
           </Typography.Paragraph>
           <div style={{ borderRadius: 8, padding: 24, textAlign: 'center', backgroundColor: 'rgba(46, 46, 51, 0.05)' }}>
-            <DashboardOutlined style={{ fontSize: 24, margin: '0 auto 12px', display: 'block', color: '#7bc3db' }} />
             <Typography.Text style={{ display: 'block', color: 'rgba(46, 46, 51, 0.7)' }}>
               点击下方「开始排盘」按钮
             </Typography.Text>
@@ -244,7 +237,7 @@ export default function MeiHua() {
         </Typography.Title>
       </Flex>
 
-      <Card style={{ marginBottom: 24, backgroundColor: '#f5f1ee', borderColor: 'rgba(46, 46, 51, 0.1)' }}>
+      <Card style={{ marginBottom: 24, backgroundColor: '#D4E4DF', borderColor: 'rgba(46, 46, 51, 0.1)' }}>
         <Flex vertical gap={16}>
           <Input.TextArea
             placeholder="请输入事项内容（选填）"
@@ -272,7 +265,6 @@ export default function MeiHua() {
           <Button
             type="default"
             size="large"
-            icon={<HistoryOutlined />}
             onClick={() => navigate('/meihua/records')}
             style={{ width: '100%' }}
           >

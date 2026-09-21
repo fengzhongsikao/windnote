@@ -42,7 +42,7 @@ export default function Library() {
           <Card
             key={gua.number}
             hoverable
-            style={{ backgroundColor: '#f5f1ee', borderColor: 'rgba(46, 46, 51, 0.1)' }}
+            style={{ backgroundColor: '#D4E4DF', borderColor: 'rgba(46, 46, 51, 0.1)' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
               <div>
