@@ -23,14 +23,13 @@ type MovingDetail struct {
 }
 
 type MeihuaRecord struct {
-	ID          string `json:"id"`
-	UpperNum    int    `json:"upperNum"`
-	LowerNum    int    `json:"lowerNum"`
-	MovingYao   int    `json:"movingYao"`
-	Method      string `json:"method"`
-	Question    string `json:"question"`
-	ManualLines []int  `json:"manualLines,omitempty"`
-	CreatedAt   string `json:"createdAt"`
+	ID        string `json:"id"`
+	UpperNum  int    `json:"upperNum"`
+	LowerNum  int    `json:"lowerNum"`
+	MovingYao int    `json:"movingYao"`
+	Method    string `json:"method"`
+	Question  string `json:"question"`
+	CreatedAt string `json:"createdAt"`
 }
 
 func (a *App) getRecordsFilePath() string {

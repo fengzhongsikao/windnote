@@ -4,6 +4,34 @@ import YaoDisplay from '@/components/YaoDisplay'
 import { useNavigate } from 'react-router-dom'
 import { SaveMeihuaRecord } from '../../../wailsjs/go/zhanbu/App'
 
+const YAO_NAMES = ['上', '五', '四', '三', '二', '初'] as const
+const YAO_DISPLAY_ORDER = [0,1,2,3,4,5] as const
+
+const LINE_OPTIONS = [
+  {
+    value: 0,
+    label: (
+      <Flex align="center" gap={8}>
+        <Typography.Text style={{ flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+          少阴
+        </Typography.Text>
+        <YaoDisplay type={0} />
+      </Flex>
+    ),
+  },
+  {
+    value: 1,
+    label: (
+      <Flex align="center" gap={8}>
+        <Typography.Text style={{ flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+          少阳
+        </Typography.Text>
+        <YaoDisplay type={1} />
+      </Flex>
+    ),
+  },
+]
+
 function toGuaNum(n: number) {
   const r = n % 8
   return r === 0 ? 8 : r
@@ -18,11 +46,12 @@ function generateMeihua(method: string, numberInput: number | null, manualLines:
   let upperNum, lowerNum, moving
 
   if (method === 'manual') {
-    const lowerBits = manualLines![0] * 4 + manualLines![1] * 2 + manualLines![2] * 1
-    const upperBits = manualLines![3] * 4 + manualLines![4] * 2 + manualLines![5] * 1
+    // manualLines: [上, 五, 四, 三, 二, 初]
+    const upperBits = manualLines![2] * 4 + manualLines![1] * 2 + manualLines![0] * 1
+    const lowerBits = manualLines![5] * 4 + manualLines![4] * 2 + manualLines![3] * 1
     upperNum = 8 - upperBits
     lowerNum = 8 - lowerBits
-    moving = movingYao
+    moving = movingYao 
   } else if (method === 'number') {
     const str = String(numberInput ?? '').replace(/\D/g, '')
 
@@ -60,7 +89,7 @@ function generateMeihua(method: string, numberInput: number | null, manualLines:
       const shichenIndex = Math.floor(((hour + 1) % 24) / 2)
       moving = ((moving + shichenIndex) % 6) + 1
     }
-  } else {
+  } else if (method === 'auto') {
     const randUpper = Math.floor(Math.random() * 8) + 1
     const randLower = Math.floor(Math.random() * 8) + 1
     upperNum = randUpper
@@ -98,7 +127,6 @@ export default function MeiHua() {
       movingYao: res.moving,
       method,
       question,
-      manualLines: method === 'manual' ? manualLines : undefined,
       createdAt: new Date().toISOString(),
     }
 
@@ -112,7 +140,6 @@ export default function MeiHua() {
       state: {
         upperNum: res.upperNum,
         lowerNum: res.lowerNum,
-        manualLines: method === 'manual' ? manualLines : null,
         movingYao: res.moving,
       },
     })
@@ -132,55 +159,35 @@ export default function MeiHua() {
               选择动爻
             </Typography.Text>
           </Flex>
-          <Radio.Group
-            value={movingYao}
-            onChange={(e) => setMovingYao(e.target.value)}
-            style={{ display: 'flex', flexDirection: 'column', gap: 16 }}
-          >
-              {[5, 4, 3, 2, 1, 0].map((dataIndex) => {
-              const label = ['初', '二', '三', '四', '五', '上'][dataIndex]
-              return (
-                <Flex key={dataIndex} align="center" gap={40}>
-                  <Flex align="center" gap={16} style={{ width: 272 }}>
-                    <Typography.Text style={{ width: 32, flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
-                      {label}爻
-                    </Typography.Text>
-                    <Select
-                      size="small"
-                      value={manualLines[dataIndex]}
-                      onChange={(val) => handleLineChange(dataIndex, val)}
-                      style={{ width: 224 }}
-                      options={[
-                        {
-                          value: 0,
-                          label: (
-                            <Flex align="center" gap={8}>
-                              <Typography.Text style={{ flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
-                                少阴
-                              </Typography.Text>
-                              <YaoDisplay type={0} />
-                            </Flex>
-                          ),
-                        },
-                        {
-                          value: 1,
-                          label: (
-                            <Flex align="center" gap={8}>
-                              <Typography.Text style={{ flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
-                                少阳
-                              </Typography.Text>
-                              <YaoDisplay type={1} />
-                            </Flex>
-                          ),
-                        },
-                      ]}
-                    />
-                  </Flex>
-                  <Radio value={dataIndex + 1}>{label}爻动</Radio>
+          <Flex gap={40}>
+            <Flex vertical gap={16} style={{ width: 272 }}>
+              {YAO_DISPLAY_ORDER.map((dataIndex) => (
+                <Flex key={dataIndex} align="center" gap={16}>
+                  <Typography.Text style={{ width: 32, flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+                    {YAO_NAMES[dataIndex]}爻
+                  </Typography.Text>
+                  <Select
+                    size="small"
+                    value={manualLines[dataIndex]}
+                    onChange={(val) => handleLineChange(dataIndex, val)}
+                    style={{ width: 224 }}
+                    options={LINE_OPTIONS}
+                  />
                 </Flex>
-              )
-            })}
-            </Radio.Group>
+              ))}
+            </Flex>
+            <Radio.Group
+              vertical
+              value={movingYao}
+              onChange={(e) => setMovingYao(e.target.value)}
+              options={YAO_DISPLAY_ORDER.map((dataIndex) => ({
+                value: dataIndex + 1,
+                label: `${YAO_NAMES[dataIndex]}爻动`,
+                style: { height: 24, lineHeight: '24px' },
+              }))}
+              style={{ gap: 16 }}
+            />
+          </Flex>
         </div>
       ),
     },

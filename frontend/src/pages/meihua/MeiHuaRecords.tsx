@@ -35,7 +35,6 @@ interface MeihuaRecord {
   movingYao: number
   method: string
   question: string
-  manualLines: number[] | null
   createdAt: string
 }
 
@@ -60,7 +59,7 @@ function getGuaDisplayName(upperNum: number, lowerNum: number): string {
 }
 
 
-const yaoLabels = ['初', '二', '三', '四', '五', '上']
+const yaoLabels = ['上', '五', '四', '三', '二', '初']
 
 function formatTime(isoString: string): string {
   const date = new Date(isoString)
@@ -99,7 +98,6 @@ export default function MeiHuaRecords() {
       state: {
         upperNum: record.upperNum,
         lowerNum: record.lowerNum,
-        manualLines: record.manualLines || null,
         movingYao: record.movingYao,
       },
     })

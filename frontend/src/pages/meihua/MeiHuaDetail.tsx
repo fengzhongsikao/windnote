@@ -103,8 +103,9 @@ function YaoLine({ type, isRed }: { type: number, isRed: boolean }) {
 function TiYongLabels({ movingYao }: { movingYao: number | null | undefined }) {
   if (movingYao == null) return null
 
+  // 动爻 1=上…3=四（上卦）→ 上用下体；4=三…6=初（下卦）→ 上体下用
   const getLabels = () => {
-    if (movingYao >= 1 && movingYao <= 3) {
+    if (movingYao >= 4 && movingYao <= 6) {
       return { upper: '体', lower: '用' }
     }
     return { upper: '用', lower: '体' }
@@ -145,12 +146,14 @@ function HexagramCard({ title, hexagram, highlightMoving, movingYao, isMain }: H
   const lines = hexagram.lines || []
   const hasMoving = highlightMoving && movingYao != null
 
+  // lines 自下而上 [初…上]，展示自上而下
   const displayLines = [...lines].reverse()
   const upperGroup = displayLines.slice(0, 3)
   const lowerGroup = displayLines.slice(3, 6)
 
-  const renderLine = (line: number, lineIndexFromBottom: number) => {
-    const isMovingLine = hasMoving && movingYao === lineIndexFromBottom + 1
+  // movingYao: 1=上 … 6=初，对应自上而下的展示序号
+  const renderLine = (line: number, displayIndexFromTop: number) => {
+    const isMovingLine = hasMoving && movingYao === displayIndexFromTop + 1
     return <YaoLine type={line} isRed={!!(isMovingLine && isMain)} />
   }
 
@@ -169,12 +172,12 @@ function HexagramCard({ title, hexagram, highlightMoving, movingYao, isMain }: H
           <Flex vertical gap={6}>
             {upperGroup.map((line, i) => (
               <Flex key={i} justify="center" align="center">
-                {renderLine(line, lines.length - 1 - i)}
+                {renderLine(line, i)}
               </Flex>
             ))}
             {lowerGroup.map((line, i) => (
               <Flex key={i + 3} justify="center" align="center">
-                {renderLine(line, lines.length - 1 - (i + 3))}
+                {renderLine(line, i + 3)}
               </Flex>
             ))}
           </Flex>
@@ -193,8 +196,8 @@ function HexagramCardMain({ title, hexagram, highlightMoving, movingYao, isMain 
   const upperGroup = displayLines.slice(0, 3)
   const lowerGroup = displayLines.slice(3, 6)
 
-  const renderLine = (line: number, lineIndexFromBottom: number) => {
-    const isMovingLine = hasMoving && movingYao === lineIndexFromBottom + 1
+  const renderLine = (line: number, displayIndexFromTop: number) => {
+    const isMovingLine = hasMoving && movingYao === displayIndexFromTop + 1
     return <YaoLine type={line} isRed={!!(isMovingLine && isMain)} />
   }
 
@@ -215,12 +218,12 @@ function HexagramCardMain({ title, hexagram, highlightMoving, movingYao, isMain 
           <Flex vertical gap={6}>
             {upperGroup.map((line, i) => (
               <Flex key={i} justify="center" align="center">
-                {renderLine(line, lines.length - 1 - i)}
+                {renderLine(line, i)}
               </Flex>
             ))}
             {lowerGroup.map((line, i) => (
               <Flex key={i + 3} justify="center" align="center">
-                {renderLine(line, lines.length - 1 - (i + 3))}
+                {renderLine(line, i + 3)}
               </Flex>
             ))}
           </Flex>
@@ -310,7 +313,9 @@ export default function MeiHuaDetail() {
   const huGua = linesToHexagram(huGuaLines)
 
   const changeLines = [...lines]
-  changeLines[movingYao - 1] = changeLines[movingYao - 1] === 1 ? 0 : 1
+  // lines 自下而上 [初…上]，movingYao 1=上…6=初 → 下标 6 - movingYao
+  const movingLineIndex = 6 - movingYao
+  changeLines[movingLineIndex] = changeLines[movingLineIndex] === 1 ? 0 : 1
   const changeGua = linesToHexagram(changeLines)
 
   const cuoLines = lines.map(l => (l === 1 ? 0 : 1))
