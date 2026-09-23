@@ -118,6 +118,7 @@ export default function LiuYaoRecords() {
         movingDetails: record.movingDetails,
         method: record.method,
         question: record.question,
+        createdAt: record.createdAt,
       },
     })
   }

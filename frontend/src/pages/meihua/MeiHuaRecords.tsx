@@ -129,6 +129,7 @@ export default function MeiHuaRecords() {
         movingYao: record.movingYao,
         question: record.question,
         method: record.method,
+        createdAt: record.createdAt,
       },
     })
   }

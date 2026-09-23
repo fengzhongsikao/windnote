@@ -114,6 +114,7 @@ export default function LiuYao() {
     const rawLines = method === 'manual' ? manualLines : generateAutoLines()
     const result = computeHexagram(rawLines)
 
+    const createdAt = new Date().toISOString()
     const record = {
       id: Date.now().toString(),
       upperGua: result.upperGua,
@@ -121,7 +122,7 @@ export default function LiuYao() {
       movingDetails: result.movingDetails,
       method,
       question: trimmedQuestion,
-      createdAt: new Date().toISOString(),
+      createdAt,
     }
 
     try {
@@ -137,6 +138,7 @@ export default function LiuYao() {
         movingDetails: result.movingDetails,
         method,
         question: trimmedQuestion,
+        createdAt,
       },
     })
   }, [method, manualLines, question, navigate])

@@ -5,7 +5,7 @@ import {
 } from '@ant-design/icons'
 import { useCallback, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { toBlob } from 'html-to-image'
+import { toPng } from 'html-to-image'
 import { SaveScreenshot } from '../../../wailsjs/go/zhanbu/App'
 import { guaIndexMap, guaMap } from '@/values/guaMap'
 import guoxueData from '@/assets/guoxue.json'
@@ -18,6 +18,23 @@ const methodLabels: Record<string, string> = {
   manual: '手动指定',
   number: '数字起卦',
   auto: '自动起卦',
+}
+
+function formatCastTime(isoString: string) {
+  const date = new Date(isoString)
+  if (Number.isNaN(date.getTime())) return isoString
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
+
+function toScreenshotFilename(title: string | undefined | null, fallback: string) {
+  const name = (title || fallback).trim().replace(/[\\/:*?"<>|]/g, '_').slice(0, 80)
+  return `${name || fallback}.png`
 }
 
 const trigramElements: Record<number, string> = {
@@ -244,35 +261,30 @@ function HexagramCardMain({ title, hexagram, highlightMoving, movingYao, isMain 
 export default function MeiHuaDetail() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { upperNum, lowerNum, movingYao, question, method } = location.state || {}
+  const { upperNum, lowerNum, movingYao, question, method, createdAt } = location.state || {}
 
-  const contentRef = useRef(null)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   const handleScreenshot = useCallback(async () => {
     if (!contentRef.current) return
     try {
-      const blob = await toBlob(contentRef.current, {
+      const dataUrl = await toPng(contentRef.current, {
         backgroundColor: '#ffffff',
         pixelRatio: 2,
         cacheBust: true,
+        skipFonts: true,
       })
-      if (!blob) return
-
-      const reader = new FileReader()
-      reader.readAsDataURL(blob)
-      reader.onload = async () => {
-        const dataUrl = reader.result
-        if (typeof dataUrl !== 'string') return
-        const filename = `梅花排盘-${mainGua?.name || 'unknown'}.png`
-        const savePath = await SaveScreenshot(filename, dataUrl)
-        if (savePath) {
-          message.success(`截图已保存到 ${savePath}`)
-        }
+      const savePath = await SaveScreenshot(toScreenshotFilename(question, '梅花排盘'), dataUrl)
+      if (savePath) {
+        message.success(`截图已保存到 ${savePath}`)
       }
-    } catch {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.includes('cancelled') || msg.includes('canceled')) return
+      console.error('截图保存失败:', err)
       message.error('截图保存失败')
     }
-  }, [])
+  }, [question])
 
   if (!upperNum || !lowerNum) {
     return (
@@ -357,7 +369,7 @@ export default function MeiHuaDetail() {
 
       <Flex vertical gap={24}>
         <div ref={contentRef}>
-          {(question || method) && (
+          {(question || method || createdAt) && (
             <Card style={{ marginBottom: 24 }}>
               <Flex vertical gap={12}>
                 {question && (
@@ -377,6 +389,16 @@ export default function MeiHuaDetail() {
                     </Typography.Text>
                     <Typography.Paragraph strong style={{ margin: '4px 0 0 0' }}>
                       {methodLabels[method] || method}
+                    </Typography.Paragraph>
+                  </div>
+                )}
+                {createdAt && (
+                  <div>
+                    <Typography.Text type="secondary" style={{ fontSize: 14 }}>
+                      起卦时间
+                    </Typography.Text>
+                    <Typography.Paragraph strong style={{ margin: '4px 0 0 0' }}>
+                      {formatCastTime(createdAt)}
                     </Typography.Paragraph>
                   </div>
                 )}
@@ -434,30 +456,30 @@ export default function MeiHuaDetail() {
               />
             </Col>
           </Row>
-        </div>
 
-        {yaoTexts && (
-          <div>
-            <Typography.Title level={4} style={{ color: '#2e2e33', marginBottom: 16 }}>
-              本卦全文
-            </Typography.Title>
-            <Card>
-              <Flex vertical gap={10}>
-                {yaoTexts.map((text, idx) => (
-                  <Typography.Paragraph key={idx} style={{
-                    fontSize: 15,
-                    color: '#2e2e33',
-                    lineHeight: '26px',
-                    margin: 0,
-                    textIndent: '2em',
-                  }}>
-                    {text}
-                  </Typography.Paragraph>
-                ))}
-              </Flex>
-            </Card>
-          </div>
-        )}
+          {yaoTexts && (
+            <div style={{ marginTop: 24 }}>
+              <Typography.Title level={4} style={{ color: '#2e2e33', marginBottom: 16 }}>
+                本卦全文
+              </Typography.Title>
+              <Card>
+                <Flex vertical gap={10}>
+                  {yaoTexts.map((text, idx) => (
+                    <Typography.Paragraph key={idx} style={{
+                      fontSize: 15,
+                      color: '#2e2e33',
+                      lineHeight: '26px',
+                      margin: 0,
+                      textIndent: '2em',
+                    }}>
+                      {text}
+                    </Typography.Paragraph>
+                  ))}
+                </Flex>
+              </Card>
+            </div>
+          )}
+        </div>
       </Flex>
     </div>
   )

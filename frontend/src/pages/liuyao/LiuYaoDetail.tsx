@@ -6,7 +6,7 @@ import {
 } from '@ant-design/icons'
 import { useMemo, useState, useRef, useCallback } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { toBlob } from 'html-to-image'
+import { toPng } from 'html-to-image'
 import { SaveScreenshot } from '../../../wailsjs/go/zhanbu/App'
 import YaoDisplay from '@/components/YaoDisplay'
 import { guaMap, liuyaoGuaNames, guaPalaceInfo } from '@/values/guaMap'
@@ -17,6 +17,23 @@ import guoxueData from '@/assets/guoxue.json'
 const methodLabels: Record<string, string> = {
   manual: '手动指定',
   auto: '自动起卦',
+}
+
+function formatCastTime(isoString: string) {
+  const date = new Date(isoString)
+  if (Number.isNaN(date.getTime())) return isoString
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
+
+function toScreenshotFilename(title: string | undefined | null, fallback: string) {
+  const name = (title || fallback).trim().replace(/[\\/:*?"<>|]/g, '_').slice(0, 80)
+  return `${name || fallback}.png`
 }
 
 function reconstructHexagram({ upperGua, lowerGua, movingDetails }: { upperGua: number, lowerGua: number, movingDetails: { position: number, type: number }[] }) {
@@ -100,7 +117,7 @@ function getGuaLiuType(guaName: string | null | undefined) {
 export default function LiuYaoDetail() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { upperGua, lowerGua, movingDetails, question, method } = location.state || {}
+  const { upperGua, lowerGua, movingDetails, question, method, createdAt } = location.state || {}
 
   const { lunarData } = useLunarStore()
   const ganzhiDay = lunarData?.ganzhi_day
@@ -150,33 +167,28 @@ export default function LiuYaoDetail() {
   const currentGuaName = hexagram?.[effectiveTab === 'main' ? 'mainGua' : 'changeGua']
   const currentGuaData = currentGuaIndex != null ? guoxueData[currentGuaIndex] : null
 
-  const contentRef = useRef(null)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   const handleScreenshot = useCallback(async () => {
     if (!contentRef.current) return
     try {
-      const blob = await toBlob(contentRef.current, {
+      const dataUrl = await toPng(contentRef.current, {
         backgroundColor: '#ffffff',
         pixelRatio: 2,
         cacheBust: true,
+        skipFonts: true,
       })
-      if (!blob) throw new Error('Failed to generate blob')
-
-      const reader = new FileReader()
-      reader.readAsDataURL(blob)
-      reader.onload = async () => {
-        const dataUrl = reader.result
-        if (typeof dataUrl !== 'string') return
-        const filename = `六爻排盘-${hexagram?.mainGua || 'unknown'}.png`
-        const savePath = await SaveScreenshot(filename, dataUrl)
-        if (savePath) {
-          message.success(`截图已保存到 ${savePath}`)
-        }
+      const savePath = await SaveScreenshot(toScreenshotFilename(question, '六爻排盘'), dataUrl)
+      if (savePath) {
+        message.success(`截图已保存到 ${savePath}`)
       }
-    } catch {
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.includes('cancelled') || msg.includes('canceled')) return
+      console.error('截图保存失败:', err)
       message.error('截图保存失败')
     }
-  }, [hexagram])
+  }, [question])
 
   if (!hexagram) {
     return (
@@ -229,7 +241,7 @@ export default function LiuYaoDetail() {
 
       <div ref={contentRef}>
         <Flex vertical gap={24}>
-        {(question || method) && (
+        {(question || method || createdAt) && (
           <Card>
             <Flex vertical gap={12}>
               {question && (
@@ -249,6 +261,16 @@ export default function LiuYaoDetail() {
                   </Typography.Text>
                   <Typography.Paragraph strong style={{ margin: '4px 0 0 0' }}>
                     {methodLabels[method] || method}
+                  </Typography.Paragraph>
+                </div>
+              )}
+              {createdAt && (
+                <div>
+                  <Typography.Text type="secondary" style={{ fontSize: 14 }}>
+                    起卦时间
+                  </Typography.Text>
+                  <Typography.Paragraph strong style={{ margin: '4px 0 0 0' }}>
+                    {formatCastTime(createdAt)}
                   </Typography.Paragraph>
                 </div>
               )}
@@ -365,10 +387,8 @@ export default function LiuYaoDetail() {
             </div>
           )}
         </div>
-        </Flex>
-      </div>
 
-      <Divider style={{ margin: '4px 0' }} />
+        <Divider style={{ margin: '4px 0' }} />
 
         <Flex gap={12} justify="center">
           <Button
@@ -409,6 +429,8 @@ export default function LiuYaoDetail() {
             </div>
           </Card>
         )}
+        </Flex>
+      </div>
     </div>
   )
 }

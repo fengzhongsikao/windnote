@@ -126,6 +126,7 @@ export default function MeiHua() {
 
     const res = generateMeihua(method, numberValue, method === 'manual' ? manualLines : null, movingYao, movingWithShichen)
 
+    const createdAt = new Date().toISOString()
     const record = {
       id: Date.now().toString(),
       upperNum: res.upperNum,
@@ -133,7 +134,7 @@ export default function MeiHua() {
       movingYao: res.moving,
       method,
       question: trimmedQuestion,
-      createdAt: new Date().toISOString(),
+      createdAt,
     }
 
     try {
@@ -149,6 +150,7 @@ export default function MeiHua() {
         movingYao: res.moving,
         question: trimmedQuestion,
         method,
+        createdAt,
       },
     })
   }, [method, numberValue, manualLines, movingYao, movingWithShichen, question, navigate])
