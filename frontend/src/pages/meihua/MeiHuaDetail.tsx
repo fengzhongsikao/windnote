@@ -14,6 +14,12 @@ const guaNames = [
   '乾', '兑', '离', '震', '巽', '坎', '艮', '坤',
 ]
 
+const methodLabels: Record<string, string> = {
+  manual: '手动指定',
+  number: '数字起卦',
+  auto: '自动起卦',
+}
+
 const trigramElements: Record<number, string> = {
   1: '天',
   2: '泽',
@@ -238,7 +244,7 @@ function HexagramCardMain({ title, hexagram, highlightMoving, movingYao, isMain 
 export default function MeiHuaDetail() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { upperNum, lowerNum, movingYao, methodName } = location.state || {}
+  const { upperNum, lowerNum, movingYao, question, method } = location.state || {}
 
   const contentRef = useRef(null)
 
@@ -351,6 +357,33 @@ export default function MeiHuaDetail() {
 
       <Flex vertical gap={24}>
         <div ref={contentRef}>
+          {(question || method) && (
+            <Card style={{ marginBottom: 24 }}>
+              <Flex vertical gap={12}>
+                {question && (
+                  <div>
+                    <Typography.Text type="secondary" style={{ fontSize: 14 }}>
+                      所问之事
+                    </Typography.Text>
+                    <Typography.Paragraph strong style={{ margin: '4px 0 0 0' }}>
+                      {question}
+                    </Typography.Paragraph>
+                  </div>
+                )}
+                {method && (
+                  <div>
+                    <Typography.Text type="secondary" style={{ fontSize: 14 }}>
+                      起卦方法
+                    </Typography.Text>
+                    <Typography.Paragraph strong style={{ margin: '4px 0 0 0' }}>
+                      {methodLabels[method] || method}
+                    </Typography.Paragraph>
+                  </div>
+                )}
+              </Flex>
+            </Card>
+          )}
+
           <Typography.Title level={4} style={{ color: '#2e2e33', marginBottom: 16 }}>
             排盘结果
           </Typography.Title>

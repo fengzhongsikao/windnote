@@ -1,4 +1,4 @@
-import { Card, Button, Input, Select, Tabs, Radio, Flex, InputNumber, Checkbox, Typography } from 'antd'
+import { Card, Button, Input, Select, Tabs, Radio, Flex, InputNumber, Checkbox, Typography, message } from 'antd'
 import { useState, useCallback } from 'react'
 import YaoDisplay from '@/components/YaoDisplay'
 import { useNavigate } from 'react-router-dom'
@@ -118,6 +118,12 @@ export default function MeiHua() {
   }, [])
 
   const handleCast = useCallback(async () => {
+    const trimmedQuestion = question.trim()
+    if (!trimmedQuestion) {
+      message.warning('请填写所问之事')
+      return
+    }
+
     const res = generateMeihua(method, numberValue, method === 'manual' ? manualLines : null, movingYao, movingWithShichen)
 
     const record = {
@@ -126,7 +132,7 @@ export default function MeiHua() {
       lowerNum: res.lowerNum,
       movingYao: res.moving,
       method,
-      question,
+      question: trimmedQuestion,
       createdAt: new Date().toISOString(),
     }
 
@@ -141,6 +147,8 @@ export default function MeiHua() {
         upperNum: res.upperNum,
         lowerNum: res.lowerNum,
         movingYao: res.moving,
+        question: trimmedQuestion,
+        method,
       },
     })
   }, [method, numberValue, manualLines, movingYao, movingWithShichen, question, navigate])
@@ -239,7 +247,7 @@ export default function MeiHua() {
   return (
     <div style={{ padding: 32, maxWidth: 1024, margin: '0 auto' }}>
       <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
-        <Typography.Title level={4} style={{ marginBottom: 0, color: '#2e2e33' }}>
+        <Typography.Title level={4} style={{ margin: 0, color: '#2e2e33' }}>
           梅花易数
         </Typography.Title>
       </Flex>
@@ -247,7 +255,7 @@ export default function MeiHua() {
       <Card style={{ marginBottom: 24, backgroundColor: '#D4E4DF', borderColor: 'rgba(46, 46, 51, 0.1)' }}>
         <Flex vertical gap={16}>
           <Input.TextArea
-            placeholder="请输入事项内容（选填）"
+            placeholder="请输入所问之事（必填）"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             style={{ maxWidth: 480 }}

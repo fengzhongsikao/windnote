@@ -1,4 +1,4 @@
-import { Card, Button, Input, Select, Tabs, Flex, Typography } from 'antd'
+import { Card, Button, Input, Select, Tabs, Flex, Typography, message } from 'antd'
 import {
   ThunderboltOutlined,
   SlidersOutlined,
@@ -105,6 +105,12 @@ export default function LiuYao() {
   }, [])
 
   const handleCast = useCallback(async () => {
+    const trimmedQuestion = question.trim()
+    if (!trimmedQuestion) {
+      message.warning('请填写所问之事')
+      return
+    }
+
     const rawLines = method === 'manual' ? manualLines : generateAutoLines()
     const result = computeHexagram(rawLines)
 
@@ -114,7 +120,7 @@ export default function LiuYao() {
       lowerGua: result.lowerGua,
       movingDetails: result.movingDetails,
       method,
-      question,
+      question: trimmedQuestion,
       createdAt: new Date().toISOString(),
     }
 
@@ -130,7 +136,7 @@ export default function LiuYao() {
         lowerGua: result.lowerGua,
         movingDetails: result.movingDetails,
         method,
-        question,
+        question: trimmedQuestion,
       },
     })
   }, [method, manualLines, question, navigate])
@@ -236,7 +242,7 @@ export default function LiuYao() {
   return (
     <div style={{ padding: 32, maxWidth: 1024, margin: '0 auto' }}>
       <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
-        <Typography.Title level={4} style={{ marginBottom: 0, color: '#2e2e33' }}>
+        <Typography.Title level={4} style={{ margin: 0, color: '#2e2e33' }}>
           六爻起卦
         </Typography.Title>
       </Flex>
@@ -244,7 +250,7 @@ export default function LiuYao() {
       <Card style={{ marginBottom: 24, backgroundColor: '#D4E4DF', borderColor: 'rgba(46, 46, 51, 0.1)' }}>
         <Flex vertical gap={16}>
           <Input.TextArea
-            placeholder="请诚心默念你所问之事..."
+            placeholder="请输入所问之事（必填）"
             value={question}
             onChange={(e) => setQuestion(e.target.value)}
             style={{ maxWidth: 480 }}

@@ -14,6 +14,11 @@ import { LIU_SHI_SI_GUA } from '@/values/liushisi-gua'
 import useLunarStore from '@/stores/lunarStore'
 import guoxueData from '@/assets/guoxue.json'
 
+const methodLabels: Record<string, string> = {
+  manual: '手动指定',
+  auto: '自动起卦',
+}
+
 function reconstructHexagram({ upperGua, lowerGua, movingDetails }: { upperGua: number, lowerGua: number, movingDetails: { position: number, type: number }[] }) {
   const upperBinary = upperGua === 8 ? 0 : 8 - upperGua
   const lowerBinary = lowerGua === 8 ? 0 : 8 - lowerGua
@@ -95,7 +100,7 @@ function getGuaLiuType(guaName: string | null | undefined) {
 export default function LiuYaoDetail() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { upperGua, lowerGua, movingDetails, question } = location.state || {}
+  const { upperGua, lowerGua, movingDetails, question, method } = location.state || {}
 
   const { lunarData } = useLunarStore()
   const ganzhiDay = lunarData?.ganzhi_day
@@ -224,14 +229,30 @@ export default function LiuYaoDetail() {
 
       <div ref={contentRef}>
         <Flex vertical gap={24}>
-        {question && (
+        {(question || method) && (
           <Card>
-            <Typography.Text type="secondary" style={{ fontSize: 14 }}>
-              所问之事
-            </Typography.Text>
-            <Typography.Paragraph strong style={{ margin: '4px 0 0 0' }}>
-              {question}
-            </Typography.Paragraph>
+            <Flex vertical gap={12}>
+              {question && (
+                <div>
+                  <Typography.Text type="secondary" style={{ fontSize: 14 }}>
+                    所问之事
+                  </Typography.Text>
+                  <Typography.Paragraph strong style={{ margin: '4px 0 0 0' }}>
+                    {question}
+                  </Typography.Paragraph>
+                </div>
+              )}
+              {method && (
+                <div>
+                  <Typography.Text type="secondary" style={{ fontSize: 14 }}>
+                    起卦方法
+                  </Typography.Text>
+                  <Typography.Paragraph strong style={{ margin: '4px 0 0 0' }}>
+                    {methodLabels[method] || method}
+                  </Typography.Paragraph>
+                </div>
+              )}
+            </Flex>
           </Card>
         )}
 
