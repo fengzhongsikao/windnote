@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"changeme/zhanbu"
 	"github.com/wailsapp/wails/v3/pkg/application"
 )
 
@@ -17,9 +18,9 @@ func init() {
 func main() {
 	app := application.New(application.Options{
 		Name:        "windnote",
-		Description: "A demo of using raw HTML & CSS",
+		Description: "一个起卦工具",
 		Services: []application.Service{
-			application.NewService(&GreetService{}),
+			application.NewService(zhanbu.New()),
 		},
 		Assets: application.AssetOptions{
 			Handler: application.AssetFileServerFS(assets),
@@ -31,8 +32,8 @@ func main() {
 	app.Window.NewWithOptions(application.WebviewWindowOptions{
 		Title: "Window 1",
 		// Window sized to the golden ratio (1000 / 618 ≈ 1.618).
-		Width:  1000,
-		Height: 618,
+		Width:  1222,
+		Height: 768,
 		Mac: application.MacWindow{
 			InvisibleTitleBarHeight: 50,
 			Backdrop:                application.MacBackdropTranslucent,

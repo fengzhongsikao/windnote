@@ -1,120 +1,96 @@
-import { useState, useEffect, useRef } from 'react'
-import {Events, WML} from "@wailsio/runtime";
-import {GreetService} from "../bindings/changeme";
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
+import { Button, Tooltip, Divider } from 'antd'
+import {
+  HomeOutlined,
+  UpCircleOutlined,
+  DownCircleOutlined,
+  BookOutlined,
+  SettingOutlined,
+  MoonOutlined,
+  SunOutlined,
+} from '@ant-design/icons'
+import { useState } from 'react'
+import Dashboard from './pages/Dashboard'
+import LiuYao from './pages/liuyao/LiuYao'
+import LiuYaoDetail from './pages/liuyao/LiuYaoDetail'
+import LiuYaoRecords from './pages/liuyao/LiuYaoRecords'
+import MeiHua from './pages/meihua/MeiHua'
+import MeiHuaDetail from './pages/meihua/MeiHuaDetail'
+import MeiHuaRecords from './pages/meihua/MeiHuaRecords'
+import Library from './pages/Library'
+import SettingsPage from './pages/Settings'
 
-// Show the actual Wails version this project was generated against.
-const wailsVersion = "v3.0.0";
+const navItems = [
+  { path: '/', label: '首页', icon: HomeOutlined },
+  { path: '/liuyao', label: '六爻起卦', icon: UpCircleOutlined  },
+  { path: '/meihua', label: '梅花易数', icon: DownCircleOutlined },
+  { path: '/library', label: '解卦库', icon: BookOutlined },
+  { path: '/settings', label: '设置', icon: SettingOutlined },
+]
 
-function App() {
-  const [name, setName] = useState<string>('');
-  const [time, setTime] = useState<string>('Listening for Time event...');
+function Sidebar() {
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [isDark, setIsDark] = useState(true)
 
-  const titleNameRef = useRef<HTMLSpanElement | null>(null);
-  const toastRef = useRef<HTMLDivElement | null>(null);
-  const resultRef = useRef<HTMLSpanElement | null>(null);
-  const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-
-  // Crossfade the framework word in the heading ("Wails + React") to the name
-  // the user entered ("Wails + <name>"): the old word fades out while the new one
-  // fades in over the same spot.
-  const swapTitleName = (name: string) => {
-    const titleNameElement = titleNameRef.current;
-    if (!titleNameElement) {
-      return;
-    }
-    const current = titleNameElement.querySelector('.title-name-text:not(.is-outgoing)');
-    if (!current || current.textContent === name) {
-      return;
-    }
-    const incoming = document.createElement('span');
-    incoming.className = 'title-name-text is-entering';
-    incoming.textContent = name;
-    current.classList.add('is-outgoing');
-    titleNameElement.appendChild(incoming);
-    // Force a reflow so the transitions run from the starting state.
-    void incoming.offsetWidth;
-    incoming.classList.remove('is-entering');
-    current.classList.add('is-leaving');
-    current.addEventListener('transitionend', () => current.remove(), {once: true});
-  };
-
-  // Pop the toast with the message Go returned, then auto-dismiss it.
-  const showToast = (message: string) => {
-    if (resultRef.current) {
-      resultRef.current.innerText = message;
-    }
-    if (toastRef.current) {
-      toastRef.current.classList.add('is-visible');
-    }
-    clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => {
-      if (toastRef.current) {
-        toastRef.current.classList.remove('is-visible');
-      }
-    }, 4000);
-  };
-
-  const doGreet = () => {
-    let n = name || 'anonymous';
-    swapTitleName(n);
-    GreetService.Greet(n).then(showToast).catch(console.error);
-  };
-
-  useEffect(() => {
-    Events.On('time', (timeValue: any) => {
-      // On a narrow screen the full RFC1123 stamp is too wide for the footer, so
-      // show just the clock time there (matching the CSS breakpoint).
-      const full = timeValue.data;
-      const compact = (full.match(/\d{1,2}:\d{2}:\d{2}/) || [full])[0];
-      setTime(window.matchMedia('(max-width: 640px)').matches ? compact : full);
-    });
-    // Reload WML so it picks up the wml tags
-    WML.Reload();
-  }, []);
+  const toggleTheme = () => {
+    setIsDark(!isDark)
+    document.documentElement.classList.toggle('dark')
+  }
 
   return (
-    <>
-      <main className="container">
-        <header className="brand">
-          <a className="brand-mark" data-wml-openURL="https://v3.wails.io" aria-label="Wails website">
-            <img src="/wails.png" className="brand-logo" alt="Wails logo"/>
-          </a>
-          <a className="brand-badge" data-wml-openURL="https://reactjs.org" aria-label="React">
-            <img src="/react.svg" alt="React logo"/>
-          </a>
-        </header>
+    <div style={{ position: 'fixed', left: 0, top: 0, width: 80, height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 0', backgroundColor: 'white', zIndex: 50, borderRight: '1px solid rgba(46, 46, 51, 0.1)' }}>
+      <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, width: '100%', padding: '0 8px', alignItems: 'center' }}>
+        {navItems.map((item) => {
+          const isActive = location.pathname === item.path
+          const Icon = item.icon
+          return (
+            <Tooltip key={item.path} title={item.label} placement="right">
+              <Button
+                type={isActive ? 'primary' : 'text'}
+                icon={<Icon />}
+                onClick={() => navigate(item.path)}
+                style={{ width: '100%' }}
+                size="large"
+              />
+            </Tooltip>
+          )
+        })}
+      </nav>
 
-        <h1 className="title"><span className="title-accent">Wails +</span> <span className="title-name" ref={titleNameRef}><span className="title-name-text">React</span></span></h1>
-        <p className="subtitle">Build beautiful cross-platform apps with Go and React.</p>
+      <Divider style={{ margin: '16px 0', width: 48, borderColor: 'rgba(46, 46, 51, 0.1)' }} />
 
-        <div className="greet">
-          <div className="input-box">
-            <svg className="input-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            <input aria-label="input" className="input" value={name} onChange={(e) => setName(e.target.value)} type="text" placeholder="Your name" autoComplete="off"/>
-            <button aria-label="greet-btn" className="btn" onClick={doGreet}>Greet
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-            </button>
-          </div>
-        </div>
-      </main>
-
-      <hr className="footer-divider"/>
-      <footer className="footer">
-        <span className="footer-version"><span>{wailsVersion}</span></span>
-        <span className="footer-time">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          <span>{time}</span>
-        </span>
-        <a className="footer-docs" data-wml-openURL="https://v3.wails.io" aria-label="Wails documentation">Docs
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
-        </a>
-      </footer>
-
-      <div className="toast" ref={toastRef} role="status" aria-live="polite">
-        <span className="toast-label">From Go</span>
-        <span aria-label="result" className="toast-msg" ref={resultRef}></span>
+      <div style={{ width: '100%', padding: '0 8px' }}>
+        <Button
+          type="text"
+          style={{ width: '100%' }}
+          onClick={toggleTheme}
+          icon={isDark ? <SunOutlined /> : <MoonOutlined />}
+        />
       </div>
-    </>
+    </div>
+  )
+}
+
+function App() {
+  return (
+    <div style={{ display: 'flex', height: '100%', backgroundColor: 'white' }}>
+      <Sidebar />
+      
+      <main style={{ flex: 1, marginLeft: 80, overflow: 'auto', position: 'relative' }}>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/liuyao" element={<LiuYao />} />
+          <Route path="/liuyao/detail" element={<LiuYaoDetail />} />
+          <Route path="/liuyao/records" element={<LiuYaoRecords />} />
+          <Route path="/meihua" element={<MeiHua />} />
+          <Route path="/meihua/detail" element={<MeiHuaDetail />} />
+          <Route path="/meihua/records" element={<MeiHuaRecords />} />
+          <Route path="/library" element={<Library />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Routes>
+      </main>
+    </div>
   )
 }
 

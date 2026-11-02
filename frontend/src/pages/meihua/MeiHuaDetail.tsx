@@ -1,0 +1,486 @@
+import { Card, Button, Flex, Typography, Row, Col, message } from 'antd'
+import {
+  ArrowLeftOutlined,
+  DownloadOutlined,
+} from '@ant-design/icons'
+import { useCallback, useRef } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
+import { toPng } from 'html-to-image'
+import { App } from '../../../bindings/changeme/zhanbu'
+import { guaIndexMap, guaMap } from '@/values/guaMap'
+import guoxueData from '@/assets/guoxue.json'
+
+const guaNames = [
+  '乾', '兑', '离', '震', '巽', '坎', '艮', '坤',
+]
+
+const methodLabels: Record<string, string> = {
+  manual: '手动指定',
+  number: '数字起卦',
+  auto: '自动起卦',
+}
+
+function formatCastTime(isoString: string) {
+  const date = new Date(isoString)
+  if (Number.isNaN(date.getTime())) return isoString
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const hours = String(date.getHours()).padStart(2, '0')
+  const minutes = String(date.getMinutes()).padStart(2, '0')
+  const seconds = String(date.getSeconds()).padStart(2, '0')
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`
+}
+
+function toScreenshotFilename(title: string | undefined | null, fallback: string) {
+  const name = (title || fallback).trim().replace(/[\\/:*?"<>|]/g, '_').slice(0, 80)
+  return `${name || fallback}.png`
+}
+
+const trigramElements: Record<number, string> = {
+  1: '天',
+  2: '泽',
+  3: '火',
+  4: '雷',
+  5: '风',
+  6: '水',
+  7: '山',
+  8: '地',
+}
+
+function getGuaFromNumber(n: number) {
+  const idx = ((n - 1) % 8 + 8) % 8
+  return { name: guaNames[idx], index: idx }
+}
+
+function getHexagramDisplayName(upperNum: number, lowerNum: number) {
+  const key = `${upperNum}-${lowerNum}`
+  const name = guaIndexMap[key]
+  if (!name) return null
+
+  const upperName = guaNames[((upperNum - 1) % 8 + 8) % 8]
+
+  if (upperNum === lowerNum) {
+    const element = trigramElements[upperNum]
+    return `${upperName}为${element}`
+  }
+
+  const upperElement = trigramElements[upperNum]
+  const lowerElement = trigramElements[lowerNum]
+  return `${upperElement}${lowerElement}${name}`
+}
+
+function trigramIndexToBits(index: number) {
+  const val = 7 - index
+  return [val & 1, (val >> 1) & 1, (val >> 2) & 1]
+}
+
+function linesToHexagram(lines: number[]) {
+  const lowerVal = lines[0] * 4 + lines[1] * 2 + lines[2] * 1
+  const upperVal = lines[3] * 4 + lines[4] * 2 + lines[5] * 1
+  const lowerIdx = 7 - lowerVal
+  const upperIdx = 7 - upperVal
+  const upperNum = upperIdx + 1
+  const lowerNum = lowerIdx + 1
+
+  const simpleName = guaNames[upperIdx] + guaNames[lowerIdx]
+  const displayName = getHexagramDisplayName(upperNum, lowerNum) || simpleName
+
+  return {
+    name: displayName,
+    simpleName,
+    upper: { name: guaNames[upperIdx], index: upperIdx },
+    lower: { name: guaNames[lowerIdx], index: lowerIdx },
+    lines: [...lines],
+  }
+}
+
+function getHexagramIndex(upperNum: number, lowerNum: number) {
+  for (let i = 0; i < guaMap.length; i++) {
+    const entry = guaMap[i]
+    const key = Object.keys(entry)[0]
+    if (Number(key) === upperNum && entry[key] === lowerNum) {
+      return i
+    }
+  }
+  return -1
+}
+
+function YaoLine({ type, isRed }: { type: number, isRed: boolean }) {
+  const isYang = type === 1
+  const bgColor = isRed ? '#ff0008ff' : '#000000ff'
+  return (
+    <Flex justify="center" align="center">
+      {isYang ? (
+        <div style={{ height: 10, width: 88, borderRadius: 2, backgroundColor: bgColor }} />
+      ) : (
+        <Flex align="center" gap={10}>
+          <div style={{ height: 10, width: 39, borderRadius: 2, backgroundColor: bgColor }} />
+          <div style={{ height: 10, width: 39, borderRadius: 2, backgroundColor: bgColor }} />
+        </Flex>
+      )}
+    </Flex>
+  )
+}
+
+function TiYongLabels({ movingYao }: { movingYao: number | null | undefined }) {
+  if (movingYao == null) return null
+
+  // 动爻 1=上…3=四（上卦）→ 上用下体；4=三…6=初（下卦）→ 上体下用
+  const getLabels = () => {
+    if (movingYao >= 4 && movingYao <= 6) {
+      return { upper: '体', lower: '用' }
+    }
+    return { upper: '用', lower: '体' }
+  }
+
+  const { upper, lower } = getLabels()
+
+  const labelStyle: React.CSSProperties = {
+    fontSize: 14,
+    color: '#2e2e33',
+    width: 16,
+    textAlign: 'center',
+    fontWeight: 700,
+  }
+
+  return (
+    <Flex vertical justify="space-between" style={{ marginRight: 16 }}>
+      <Flex align="center" style={{ minHeight: 42 }}>
+        <span style={labelStyle}>{upper}</span>
+      </Flex>
+      <Flex align="center" style={{ minHeight: 42 }}>
+        <span style={labelStyle}>{lower}</span>
+      </Flex>
+    </Flex>
+  )
+}
+
+interface HexagramCardProps {
+  title: string
+  hexagram: { name: string; simpleName?: string; upper?: { name: string; index: number }; lower?: { name: string; index: number }; lines: number[] } | null | undefined
+  highlightMoving?: boolean
+  movingYao?: number
+  isMain?: boolean
+}
+
+function HexagramCard({ title, hexagram, highlightMoving, movingYao, isMain }: HexagramCardProps) {
+  if (!hexagram) return null
+  const lines = hexagram.lines || []
+  const hasMoving = highlightMoving && movingYao != null
+
+  // lines 自下而上 [初…上]，展示自上而下
+  const displayLines = [...lines].reverse()
+  const upperGroup = displayLines.slice(0, 3)
+  const lowerGroup = displayLines.slice(3, 6)
+
+  // movingYao: 1=上 … 6=初，对应自上而下的展示序号
+  const renderLine = (line: number, displayIndexFromTop: number) => {
+    const isMovingLine = hasMoving && movingYao === displayIndexFromTop + 1
+    return <YaoLine type={line} isRed={!!(isMovingLine && isMain)} />
+  }
+
+  return (
+    <Card>
+      <Flex vertical align="center">
+        <Flex justify="center" align="center" gap={8} style={{ marginBottom: 12 }}>
+          <Typography.Text style={{ fontSize: 14, color: '#0dc2b3' }}>
+            {title}
+          </Typography.Text>
+        </Flex>
+        <Flex vertical align="center">
+          <Typography.Text strong style={{ fontSize: 18, color: '#2e2e33', marginBottom: 12 }}>
+            {hexagram.name}
+          </Typography.Text>
+          <Flex vertical gap={6}>
+            {upperGroup.map((line, i) => (
+              <Flex key={i} justify="center" align="center">
+                {renderLine(line, i)}
+              </Flex>
+            ))}
+            {lowerGroup.map((line, i) => (
+              <Flex key={i + 3} justify="center" align="center">
+                {renderLine(line, i + 3)}
+              </Flex>
+            ))}
+          </Flex>
+        </Flex>
+      </Flex>
+    </Card>
+  )
+}
+
+function HexagramCardMain({ title, hexagram, highlightMoving, movingYao, isMain }: HexagramCardProps) {
+  if (!hexagram) return null
+  const lines = hexagram.lines || []
+  const hasMoving = highlightMoving && movingYao != null
+
+  const displayLines = [...lines].reverse()
+  const upperGroup = displayLines.slice(0, 3)
+  const lowerGroup = displayLines.slice(3, 6)
+
+  const renderLine = (line: number, displayIndexFromTop: number) => {
+    const isMovingLine = hasMoving && movingYao === displayIndexFromTop + 1
+    return <YaoLine type={line} isRed={!!(isMovingLine && isMain)} />
+  }
+
+  return (
+    <Card>
+      <Flex align="end">
+         <TiYongLabels movingYao={movingYao} />
+         <Flex vertical align="center">
+        <Flex justify="center" align="center" gap={8} style={{ marginBottom: 12 }}>
+          <Typography.Text style={{ fontSize: 14, color: '#ff0000' }}>
+            {title}
+          </Typography.Text>
+        </Flex>
+        <Flex vertical align="center">
+          <Typography.Text strong style={{ fontSize: 18, color: '#2e2e33', marginBottom: 12 }}>
+            {hexagram.name}
+          </Typography.Text>
+          <Flex vertical gap={6}>
+            {upperGroup.map((line, i) => (
+              <Flex key={i} justify="center" align="center">
+                {renderLine(line, i)}
+              </Flex>
+            ))}
+            {lowerGroup.map((line, i) => (
+              <Flex key={i + 3} justify="center" align="center">
+                {renderLine(line, i + 3)}
+              </Flex>
+            ))}
+          </Flex>
+        </Flex>
+      </Flex>
+      </Flex>
+     
+    </Card>
+  )
+}
+
+export default function MeiHuaDetail() {
+  const navigate = useNavigate()
+  const location = useLocation()
+  const { upperNum, lowerNum, movingYao, question, method, createdAt } = location.state || {}
+
+  const contentRef = useRef<HTMLDivElement>(null)
+
+  const handleScreenshot = useCallback(async () => {
+    if (!contentRef.current) return
+    try {
+      const dataUrl = await toPng(contentRef.current, {
+        backgroundColor: '#ffffff',
+        pixelRatio: 2,
+        cacheBust: true,
+        skipFonts: true,
+      })
+      const savePath = await App.SaveScreenshot(toScreenshotFilename(question, '梅花排盘'), dataUrl)
+      if (savePath) {
+        message.success(`截图已保存到 ${savePath}`)
+      }
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      if (msg.includes('cancelled') || msg.includes('canceled')) return
+      console.error('截图保存失败:', err)
+      message.error('截图保存失败')
+    }
+  }, [question])
+
+  if (!upperNum || !lowerNum) {
+    return (
+      <div style={{ padding: 32, maxWidth: 1060, margin: '0 auto' }}>
+        <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
+          <Typography.Title level={3} style={{ color: '#2e2e33', margin: 0 }}>
+            梅花易数
+          </Typography.Title>
+        </Flex>
+        <Card>
+          <Flex vertical align="center" style={{ padding: '48px 0' }}>
+            <Typography.Text style={{ color: 'rgba(46, 46, 51, 0.6)', marginBottom: 16 }}>
+              暂无排盘数据
+            </Typography.Text>
+            <Button
+              type="primary"
+              onClick={() => navigate('/meihua')}
+              icon={<ArrowLeftOutlined />}
+            >
+              返回排盘
+            </Button>
+          </Flex>
+        </Card>
+      </div>
+    )
+  }
+
+  const upper = getGuaFromNumber(upperNum)
+  const lower = getGuaFromNumber(lowerNum)
+
+  const upperBits = trigramIndexToBits(upper.index)
+  const lowerBits = trigramIndexToBits(lower.index)
+
+  const lines = [
+    lowerBits[2], lowerBits[1], lowerBits[0],
+    upperBits[2], upperBits[1], upperBits[0],
+  ]
+
+  const mainGua = linesToHexagram(lines)
+
+  const huLowerBits = [lines[1], lines[2], lines[3]]
+  const huUpperBits = [lines[2], lines[3], lines[4]]
+  const huGuaLines = [...huLowerBits, ...huUpperBits]
+  const huGua = linesToHexagram(huGuaLines)
+
+  const changeLines = [...lines]
+  // lines 自下而上 [初…上]，movingYao 1=上…6=初 → 下标 6 - movingYao
+  const movingLineIndex = 6 - movingYao
+  changeLines[movingLineIndex] = changeLines[movingLineIndex] === 1 ? 0 : 1
+  const changeGua = linesToHexagram(changeLines)
+
+  const cuoLines = lines.map(l => (l === 1 ? 0 : 1))
+  const cuoGua = linesToHexagram(cuoLines)
+
+  const zongLines = [...lines].reverse()
+  const zongGua = linesToHexagram(zongLines)
+
+  const hexagramIdx = getHexagramIndex(upperNum, lowerNum)
+  const yaoTexts = hexagramIdx >= 0 ? guoxueData[hexagramIdx]?.quan : null
+
+  return (
+    <div style={{ padding: 32, maxWidth: 1060, margin: '0 auto' }}>
+      <Flex align="center" justify="space-between" style={{ marginBottom: 24 }}>
+        <Flex align="center" gap={8}>
+          <Button
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => navigate('/meihua')}
+          />
+          <Typography.Title level={3} style={{ color: '#2e2e33', margin: 0 }}>
+            排盘详情
+          </Typography.Title>
+        </Flex>
+        <Button
+          type="default"
+          icon={<DownloadOutlined />}
+          onClick={handleScreenshot}
+        >
+          截图保存
+        </Button>
+      </Flex>
+
+      <Flex vertical gap={24}>
+        <div ref={contentRef}>
+          {(question || method || createdAt) && (
+            <Card style={{ marginBottom: 24 }}>
+              <Flex vertical gap={12}>
+                {question && (
+                  <div>
+                    <Typography.Text type="secondary" style={{ fontSize: 14 }}>
+                      所问之事
+                    </Typography.Text>
+                    <Typography.Paragraph strong style={{ margin: '4px 0 0 0' }}>
+                      {question}
+                    </Typography.Paragraph>
+                  </div>
+                )}
+                {method && (
+                  <div>
+                    <Typography.Text type="secondary" style={{ fontSize: 14 }}>
+                      起卦方法
+                    </Typography.Text>
+                    <Typography.Paragraph strong style={{ margin: '4px 0 0 0' }}>
+                      {methodLabels[method] || method}
+                    </Typography.Paragraph>
+                  </div>
+                )}
+                {createdAt && (
+                  <div>
+                    <Typography.Text type="secondary" style={{ fontSize: 14 }}>
+                      起卦时间
+                    </Typography.Text>
+                    <Typography.Paragraph strong style={{ margin: '4px 0 0 0' }}>
+                      {formatCastTime(createdAt)}
+                    </Typography.Paragraph>
+                  </div>
+                )}
+              </Flex>
+            </Card>
+          )}
+
+          <Typography.Title level={4} style={{ color: '#2e2e33', marginBottom: 16 }}>
+            排盘结果
+          </Typography.Title>
+
+          <Row gutter={[12, 12]}>
+            <Col xs={24} sm={12} md={8} lg={{ flex: '0 0 20%' }}>
+              <Flex align="stretch" justify="center">
+                <div style={{ flex: 1 }}>
+                  <HexagramCardMain
+                    title="「 本卦 」"
+                    hexagram={{
+                      name: mainGua.name,
+                      lines: mainGua.lines,
+                      upper: mainGua.upper,
+                      lower: mainGua.lower,
+                    }}
+                    highlightMoving
+                    movingYao={movingYao}
+                    isMain
+                  />
+                </div>
+              </Flex>
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={{ flex: '0 0 20%' }}>
+              <HexagramCard
+                title="「 互卦 」"
+                hexagram={huGua}
+              />
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={{ flex: '0 0 20%' }}>
+              <HexagramCard
+                title="「 变卦 」"
+                hexagram={changeGua}
+                highlightMoving
+                movingYao={movingYao}
+              />
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={{ flex: '0 0 20%' }}>
+              <HexagramCard
+                title="「 错卦 」"
+                hexagram={cuoGua}
+              />
+            </Col>
+            <Col xs={24} sm={12} md={8} lg={{ flex: '0 0 20%' }}>
+              <HexagramCard
+                title="「 综卦 」"
+                hexagram={zongGua}
+              />
+            </Col>
+          </Row>
+
+          {yaoTexts && (
+            <div style={{ marginTop: 24 }}>
+              <Typography.Title level={4} style={{ color: '#2e2e33', marginBottom: 16 }}>
+                本卦全文
+              </Typography.Title>
+              <Card>
+                <Flex vertical gap={10}>
+                  {yaoTexts.map((text, idx) => (
+                    <Typography.Paragraph key={idx} style={{
+                      fontSize: 15,
+                      color: '#2e2e33',
+                      lineHeight: '26px',
+                      margin: 0,
+                      textIndent: '2em',
+                    }}>
+                      {text}
+                    </Typography.Paragraph>
+                  ))}
+                </Flex>
+              </Card>
+            </div>
+          )}
+        </div>
+      </Flex>
+    </div>
+  )
+}
