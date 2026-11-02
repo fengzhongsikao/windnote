@@ -12,7 +12,7 @@ const { Title, Text } = Typography
 
 const colors = {
   qing: '#7bc3db',
-  hei: '#2e2e33',
+  hei: 'var(--text)',
 }
 
 export default function Dashboard() {
@@ -38,19 +38,19 @@ export default function Dashboard() {
       <Row gutter={[24, 24]}>
         <Col xs={24} lg={12} xl={8}>
           <Card
-            style={{ backgroundColor: '#fff', overflow: 'hidden' }}
+            style={{ backgroundColor: 'var(--surface)', overflow: 'hidden' }}
             styles={{ body: { padding: 0 } }}
           >
             <div style={{ padding: 16 }}>
               <Flex align="center" gap={8} style={{ marginBottom: 12 }}>
-                <Text strong style={{ color: '#fff' }}>今日黄历</Text>
+                <Text strong>今日黄历</Text>
               </Flex>
               <div style={{ textAlign: 'center', marginBottom: 16 }}>
                 <Title level={4} style={{ marginBottom: 4, color: colors.hei }}>{dateStr}</Title>
                 <Text style={{ color: 'rgba(123, 195, 219, 0.7)', fontWeight: 500 }}>{lunarData?.weekday_cn}</Text>
               </div>
 
-              <Divider style={{ margin: '16px 0', borderColor: 'rgba(46, 46, 51, 0.1)' }} />
+              <Divider style={{ margin: '16px 0', borderColor: 'var(--border)' }} />
 
               {loading && (
                 <div style={{ padding: '16px 8px' }}>
@@ -60,7 +60,7 @@ export default function Dashboard() {
 
               {!loading && lunarData && (
                 <Flex vertical gap={16}>
-                  <div style={{ background: 'rgba(123, 195, 219, 0.1)', borderRadius: 8, padding: '12px 16px', textAlign: 'center', border: '1px solid rgba(123, 195, 219, 0.2)' }}>
+                  <div style={{ borderRadius: 8, padding: '12px 16px', textAlign: 'center', border: '1px solid var(--border)' }}>
                     <Text type="secondary" style={{ fontSize: 12, marginBottom: 4, display: 'block', letterSpacing: '0.2em' }}>
                       农 历
                     </Text>
@@ -74,7 +74,7 @@ export default function Dashboard() {
 
                   <Row gutter={8}>
                     <Col span={8}>
-                      <div style={{ textAlign: 'center', borderRadius: 8, backgroundColor: 'rgba(46, 46, 51, 0.05)', padding: '8px 16px' }}>
+                      <div style={{ textAlign: 'center', borderRadius: 8, padding: '8px 16px', border: '1px solid var(--border)' }}>
                         <Text type="secondary" style={{ fontSize: 10, marginBottom: 4, display: 'block' }}>
                           年干支
                         </Text>
@@ -84,21 +84,21 @@ export default function Dashboard() {
                       </div>
                     </Col>
                     <Col span={8}>
-                      <div style={{ textAlign: 'center', borderRadius: 8, backgroundColor: 'rgba(46, 46, 51, 0.05)', padding: '8px 16px' }}>
+                      <div style={{ textAlign: 'center', borderRadius: 8, padding: '8px 16px', border: '1px solid var(--border)' }}>
                         <Text type="secondary" style={{ fontSize: 10, marginBottom: 4, display: 'block' }}>
                           月干支
                         </Text>
-                        <Text strong style={{ fontSize: 14, color: 'rgba(46, 46, 51, 0.7)' }}>
+                        <Text strong style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
                           {lunarData.ganzhi_month}
                         </Text>
                       </div>
                     </Col>
                     <Col span={8}>
-                      <div style={{ textAlign: 'center', borderRadius: 8, backgroundColor: 'rgba(46, 46, 51, 0.05)', padding: '8px 16px' }}>
+                      <div style={{ textAlign: 'center', borderRadius: 8, padding: '8px 16px', border: '1px solid var(--border)' }}>
                         <Text type="secondary" style={{ fontSize: 10, marginBottom: 4, display: 'block' }}>
                           日干支
                         </Text>
-                        <Text strong style={{ fontSize: 14, color: 'rgba(46, 46, 51, 0.7)' }}>
+                        <Text strong style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
                           {lunarData.ganzhi_day}
                         </Text>
                       </div>
@@ -110,12 +110,12 @@ export default function Dashboard() {
                       <SunOutlined style={{ color: '#faad14' }} />
                       <Text type="secondary">{lunarData.ganzhi_year}年</Text>
                     </Space>
-                    <Divider type="vertical" style={{ margin: '0 12px', borderColor: 'rgba(46, 46, 51, 0.2)' }} />
+                    <Divider type="vertical" style={{ margin: '0 12px', borderColor: 'var(--border-strong)' }} />
                     <Space size={4}>
                       <MoonOutlined style={{ color: colors.qing }} />
                       <Text type="secondary">{lunarData.lunar_month_cn}</Text>
                     </Space>
-                    <Divider type="vertical" style={{ margin: '0 12px', borderColor: 'rgba(46, 46, 51, 0.2)' }} />
+                    <Divider type="vertical" style={{ margin: '0 12px', borderColor: 'var(--border-strong)' }} />
                     <Space size={4}>
                       <Tag color="red">{lunarData.zodiac}年</Tag>
                     </Space>
@@ -133,7 +133,7 @@ export default function Dashboard() {
         </Col>
 
         <Col xs={24} lg={12} xl={16}>
-          <Card style={{ height: '100%', background: '#fff' }}>
+          <Card style={{ height: '100%', background: 'var(--surface)' }}>
             <Flex vertical justify="center" align="center" style={{ padding: '32px 0', textAlign: 'center' }}>
               <Title level={4} style={{ marginBottom: 8, color: colors.hei }}>立即起卦</Title>
               <Text type="secondary" style={{ marginBottom: 16 }}>心有所疑，卦象自知</Text>

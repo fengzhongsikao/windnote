@@ -138,7 +138,7 @@ function TiYongLabels({ movingYao }: { movingYao: number | null | undefined }) {
 
   const labelStyle: React.CSSProperties = {
     fontSize: 14,
-    color: '#2e2e33',
+    color: 'var(--text)',
     width: 16,
     textAlign: 'center',
     fontWeight: 700,
@@ -189,7 +189,7 @@ function HexagramCard({ title, hexagram, highlightMoving, movingYao, isMain }: H
           </Typography.Text>
         </Flex>
         <Flex vertical align="center">
-          <Typography.Text strong style={{ fontSize: 18, color: '#2e2e33', marginBottom: 12 }}>
+          <Typography.Text strong style={{ fontSize: 18, color: 'var(--text)', marginBottom: 12 }}>
             {hexagram.name}
           </Typography.Text>
           <Flex vertical gap={6}>
@@ -235,7 +235,7 @@ function HexagramCardMain({ title, hexagram, highlightMoving, movingYao, isMain 
           </Typography.Text>
         </Flex>
         <Flex vertical align="center">
-          <Typography.Text strong style={{ fontSize: 18, color: '#2e2e33', marginBottom: 12 }}>
+          <Typography.Text strong style={{ fontSize: 18, color: 'var(--text)', marginBottom: 12 }}>
             {hexagram.name}
           </Typography.Text>
           <Flex vertical gap={6}>
@@ -290,13 +290,13 @@ export default function MeiHuaDetail() {
     return (
       <div style={{ padding: 32, maxWidth: 1060, margin: '0 auto' }}>
         <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
-          <Typography.Title level={3} style={{ color: '#2e2e33', margin: 0 }}>
+          <Typography.Title level={3} style={{ color: 'var(--text)', margin: 0 }}>
             梅花易数
           </Typography.Title>
         </Flex>
         <Card>
           <Flex vertical align="center" style={{ padding: '48px 0' }}>
-            <Typography.Text style={{ color: 'rgba(46, 46, 51, 0.6)', marginBottom: 16 }}>
+            <Typography.Text style={{ color: 'var(--text-secondary)', marginBottom: 16 }}>
               暂无排盘数据
             </Typography.Text>
             <Button
@@ -354,7 +354,7 @@ export default function MeiHuaDetail() {
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate('/meihua')}
           />
-          <Typography.Title level={3} style={{ color: '#2e2e33', margin: 0 }}>
+          <Typography.Title level={3} style={{ color: 'var(--text)', margin: 0 }}>
             排盘详情
           </Typography.Title>
         </Flex>
@@ -406,7 +406,7 @@ export default function MeiHuaDetail() {
             </Card>
           )}
 
-          <Typography.Title level={4} style={{ color: '#2e2e33', marginBottom: 16 }}>
+          <Typography.Title level={4} style={{ color: 'var(--text)', marginBottom: 16 }}>
             排盘结果
           </Typography.Title>
 
@@ -459,7 +459,7 @@ export default function MeiHuaDetail() {
 
           {yaoTexts && (
             <div style={{ marginTop: 24 }}>
-              <Typography.Title level={4} style={{ color: '#2e2e33', marginBottom: 16 }}>
+              <Typography.Title level={4} style={{ color: 'var(--text)', marginBottom: 16 }}>
                 本卦全文
               </Typography.Title>
               <Card>
@@ -467,7 +467,7 @@ export default function MeiHuaDetail() {
                   {yaoTexts.map((text, idx) => (
                     <Typography.Paragraph key={idx} style={{
                       fontSize: 15,
-                      color: '#2e2e33',
+                      color: 'var(--text)',
                       lineHeight: '26px',
                       margin: 0,
                       textIndent: '2em',

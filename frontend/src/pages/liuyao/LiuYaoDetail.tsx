@@ -295,6 +295,12 @@ export default function LiuYaoDetail() {
                 })()}
               </Typography.Title>
             </div>
+            {isSameGua && (
+              <>
+                <div style={{ width: 24 }} />
+                <div style={{ width: 24 }} />
+              </>
+            )}
             {!isSameGua && (
               <>
                 <div style={{ width: 24 }} />
@@ -340,7 +346,7 @@ export default function LiuYaoDetail() {
                   <div style={{ width: 24, textAlign: 'center', fontSize: 13, fontWeight: 'bold', color: isShi ? '#f5222d' : '#1890ff' }}>
                     {isShi ? '世' : isYing ? '应' : ''}
                   </div>
-                  {mainLine.isMoving && <span style={{ fontSize: 12, fontWeight: 700, color: '#2e2e33', width: 24, textAlign: 'center' }}>{mainLine.type === 3 ? '○' : '✕'}</span>}
+                  {mainLine.isMoving && <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text)', width: 24, textAlign: 'center' }}>{mainLine.type === 3 ? '○' : '✕'}</span>}
                   {!mainLine.isMoving && <span style={{ width: 24 }} />}
                   {!isSameGua && (
                     <>
@@ -370,6 +376,12 @@ export default function LiuYaoDetail() {
                   本卦{mainGuaLiuType ? `：${mainGuaLiuType}卦` : ''}
                 </Typography.Text>
               </div>
+              {isSameGua && (
+                <>
+                  <div style={{ width: 24 }} />
+                  <div style={{ width: 24 }} />
+                </>
+              )}
               {!isSameGua && (
                 <>
                   <div style={{ width: 24 }} />

@@ -30,14 +30,12 @@ func main() {
 		},
 	})
 	app.Window.NewWithOptions(application.WebviewWindowOptions{
-		Title: "Window 1",
+		Title: "风筮",
 		// Window sized to the golden ratio (1000 / 618 ≈ 1.618).
 		Width:  1222,
 		Height: 768,
 		Mac: application.MacWindow{
-			InvisibleTitleBarHeight: 50,
-			Backdrop:                application.MacBackdropTranslucent,
-			TitleBar:                application.MacTitleBarHiddenInset,
+			TitleBar: application.MacTitleBarDefault,
 		},
 		BackgroundColour: application.NewRGB(6, 7, 15),
 		URL:              "/",

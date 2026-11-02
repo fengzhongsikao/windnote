@@ -178,7 +178,7 @@ export default function LiuYaoRecords() {
             icon={<ArrowLeftOutlined />}
             onClick={() => navigate('/liuyao')}
           />
-          <Typography.Title level={4} style={{ margin: 0, color: '#2e2e33' }}>
+          <Typography.Title level={4} style={{ margin: 0, color: 'var(--text)' }}>
             排盘记录
           </Typography.Title>
         </Flex>
@@ -235,20 +235,20 @@ export default function LiuYaoRecords() {
                   padding: '16px 20px',
                   borderRadius: 8,
                   marginBottom: 8,
-                  backgroundColor: selected ? 'rgba(123, 195, 219, 0.12)' : 'white',
-                  border: `1px solid ${selected ? '#7bc3db' : 'rgba(46, 46, 51, 0.08)'}`,
+                  backgroundColor: selected ? 'rgba(123, 195, 219, 0.12)' : 'var(--surface)',
+                  border: `1px solid ${selected ? '#7bc3db' : 'var(--border)'}`,
                   transition: 'all 0.2s',
                 }}
                 onMouseEnter={(e) => {
                   if (!selected) {
-                    e.currentTarget.style.boxShadow = '0 2px 8px rgba(46, 46, 51, 0.1)'
+                    e.currentTarget.style.boxShadow = '0 2px 8px var(--border)'
                     e.currentTarget.style.borderColor = '#7bc3db'
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!selected) {
                     e.currentTarget.style.boxShadow = 'none'
-                    e.currentTarget.style.borderColor = 'rgba(46, 46, 51, 0.08)'
+                    e.currentTarget.style.borderColor = 'var(--border)'
                   }
                 }}
               >
@@ -315,8 +315,8 @@ export default function LiuYaoRecords() {
                     </Flex>
 
                     <Flex align="center" gap={4}>
-                      <ClockCircleOutlined style={{ fontSize: 12, color: 'rgba(46, 46, 51, 0.4)' }} />
-                      <Typography.Text style={{ fontSize: 12, color: 'rgba(46, 46, 51, 0.4)' }}>
+                      <ClockCircleOutlined style={{ fontSize: 12, color: 'var(--text-muted)' }} />
+                      <Typography.Text style={{ fontSize: 12, color: 'var(--text-muted)' }}>
                         {formatTime(record.createdAt)}
                       </Typography.Text>
                     </Flex>

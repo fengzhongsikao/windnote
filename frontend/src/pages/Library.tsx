@@ -1,5 +1,5 @@
 import { Card, Input, Tabs, Tag, Collapse } from 'antd'
-import { SearchOutlined, BookOutlined } from '@ant-design/icons'
+import { SearchOutlined } from '@ant-design/icons'
 import { useState, useMemo } from 'react'
 import guoxueData from '@/assets/guoxue.json'
 
@@ -42,16 +42,16 @@ export default function Library() {
           <Card
             key={gua.number}
             hoverable
-            style={{ backgroundColor: '#D4E4DF', borderColor: 'rgba(46, 46, 51, 0.1)' }}
+            style={{ backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }}
           >
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 8 }}>
               <div>
-                <div style={{ fontSize: 18, fontWeight: 700, color: '#2e2e33' }}>{gua.name}</div>
+                <div style={{ fontSize: 18, fontWeight: 700, color: 'var(--text)' }}>{gua.name}</div>
                 <div style={{ fontSize: 24, margin: '4px 0' }}>{gua.symbol}</div>
               </div>
               <Tag color="warning">第 {gua.number} 卦</Tag>
             </div>
-            <p style={{ fontSize: 14, marginBottom: 12, color: 'rgba(46, 46, 51, 0.6)' }}>{gua.meaning}</p>
+            <p style={{ fontSize: 14, marginBottom: 12, color: 'var(--text-secondary)' }}>{gua.meaning}</p>
             <Collapse
               ghost
               items={[
@@ -59,7 +59,7 @@ export default function Library() {
                   key: 'yao',
                   label: '查看爻辞',
                   children: (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 14, color: 'rgba(46, 46, 51, 0.6)' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4, fontSize: 14, color: 'var(--text-secondary)' }}>
                       {gua.quan.map((y, i) => (
                         <p key={i} style={{ margin: 0 }}>{y}</p>
                       ))}
@@ -94,16 +94,13 @@ export default function Library() {
 
   return (
     <div style={{ padding: 32, maxWidth: 1024, margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
-        <BookOutlined style={{ fontSize: 18, color: '#7bc3db' }} />
-        <h1 style={{ fontSize: 24, fontWeight: 700, color: '#2e2e33' }}>解卦库</h1>
-      </div>
+      <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 24, color: 'var(--text)' }}>解卦库</h1>
 
       <Input
         placeholder="搜索卦名、卦象或含义..."
         value={search}
         onChange={(e) => setSearch(e.target.value)}
-        prefix={<SearchOutlined style={{ color: 'rgba(46, 46, 51, 0.4)' }} />}
+        prefix={<SearchOutlined style={{ color: 'var(--text-muted)' }} />}
         style={{ maxWidth: 384, marginBottom: 24 }}
       />
       <Tabs items={tabItems} />

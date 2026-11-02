@@ -12,7 +12,7 @@ const LINE_OPTIONS = [
     value: 0,
     label: (
       <Flex align="center" gap={8}>
-        <Typography.Text style={{ flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+        <Typography.Text style={{ flexShrink: 0, color: 'var(--text-secondary)' }}>
           少阴
         </Typography.Text>
         <YaoDisplay type={0} />
@@ -23,7 +23,7 @@ const LINE_OPTIONS = [
     value: 1,
     label: (
       <Flex align="center" gap={8}>
-        <Typography.Text style={{ flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+        <Typography.Text style={{ flexShrink: 0, color: 'var(--text-secondary)' }}>
           少阳
         </Typography.Text>
         <YaoDisplay type={1} />
@@ -162,10 +162,10 @@ export default function MeiHua() {
       children: (
         <div style={{ marginTop: 16 }}>
           <Flex style={{ marginBottom: 12 }} gap={40}>
-            <Typography.Text style={{ width: 272, color: 'rgba(46, 46, 51, 0.6)' }}>
+            <Typography.Text style={{ width: 272, color: 'var(--text-secondary)' }}>
               逐爻选择阴阳
             </Typography.Text>
-            <Typography.Text style={{ color: 'rgba(46, 46, 51, 0.6)' }}>
+            <Typography.Text style={{ color: 'var(--text-secondary)' }}>
               选择动爻
             </Typography.Text>
           </Flex>
@@ -173,7 +173,7 @@ export default function MeiHua() {
             <Flex vertical gap={16} style={{ width: 272 }}>
               {YAO_DISPLAY_ORDER.map((dataIndex) => (
                 <Flex key={dataIndex} align="center" gap={16}>
-                  <Typography.Text style={{ width: 32, flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+                  <Typography.Text style={{ width: 32, flexShrink: 0, color: 'var(--text-secondary)' }}>
                     {YAO_NAMES[dataIndex]}爻
                   </Typography.Text>
                   <Select
@@ -206,7 +206,7 @@ export default function MeiHua() {
       label: <span>数字起卦</span>,
       children: (
         <div style={{ marginTop: 16 }}>
-          <Typography.Paragraph style={{ marginBottom: 16, color: 'rgba(46, 46, 51, 0.6)' }}>
+          <Typography.Paragraph style={{ marginBottom: 16, color: 'var(--text-secondary)' }}>
             起卦算法: 第一数÷8 所得余数为上卦,第二数÷8 所得余数为下卦,第三数÷6所得余数为动爻。
           </Typography.Paragraph>
           <Flex align="center" gap={16}>
@@ -230,14 +230,14 @@ export default function MeiHua() {
       label: <span>自动起卦</span>,
       children: (
         <div style={{ marginTop: 16 }}>
-          <Typography.Paragraph style={{ marginBottom: 16, color: 'rgba(46, 46, 51, 0.6)' }}>
+          <Typography.Paragraph style={{ marginBottom: 16, color: 'var(--text-secondary)' }}>
             假尔泰筮有常，假尔泰筮有常，某官姓名，今以某事云云，未知可否？爰质所疑于神灵，吉凶得失、悔吝忧虞，惟尔有神，尚明告之。
           </Typography.Paragraph>
-          <div style={{ borderRadius: 8, padding: 24, textAlign: 'center', backgroundColor: 'rgba(46, 46, 51, 0.05)' }}>
-            <Typography.Text style={{ display: 'block', color: 'rgba(46, 46, 51, 0.7)' }}>
+          <div style={{ borderRadius: 8, padding: 24, textAlign: 'center', border: '1px solid var(--border)' }}>
+            <Typography.Text style={{ display: 'block', color: 'var(--text-secondary)' }}>
               点击下方「开始排盘」按钮
             </Typography.Text>
-            <Typography.Text style={{ display: 'block', marginTop: 4, fontSize: 14, color: 'rgba(46, 46, 51, 0.5)' }}>
+            <Typography.Text style={{ display: 'block', marginTop: 4, fontSize: 14, color: 'var(--text-muted)' }}>
               系统将根据随机自动起卦
             </Typography.Text>
           </div>
@@ -249,12 +249,12 @@ export default function MeiHua() {
   return (
     <div style={{ padding: 32, maxWidth: 1024, margin: '0 auto' }}>
       <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
-        <Typography.Title level={4} style={{ margin: 0, color: '#2e2e33' }}>
+        <Typography.Title level={4} style={{ margin: 0, color: 'var(--text)' }}>
           梅花易数
         </Typography.Title>
       </Flex>
 
-      <Card style={{ marginBottom: 24, backgroundColor: '#D4E4DF', borderColor: 'rgba(46, 46, 51, 0.1)' }}>
+      <Card style={{ marginBottom: 24, backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }}>
         <Flex vertical gap={16}>
           <Input.TextArea
             placeholder="请输入所问之事（必填）"

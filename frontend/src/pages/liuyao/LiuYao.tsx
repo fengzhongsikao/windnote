@@ -150,14 +150,14 @@ export default function LiuYao() {
       children: (
         <Flex style={{ marginTop: 16 }} gap={40}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <Typography.Text style={{ display: 'block', marginBottom: 12, color: 'rgba(46, 46, 51, 0.6)' }}>
+            <Typography.Text style={{ display: 'block', marginBottom: 12, color: 'var(--text-secondary)' }}>
               逐爻选择阴阳
             </Typography.Text>
             {[5, 4, 3, 2, 1, 0].map((dataIndex) => {
               const label = ['初', '二', '三', '四', '五', '上'][dataIndex]
               return (
                 <Flex key={dataIndex} align="center" gap={16}>
-                  <Typography.Text style={{ width: 32, flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+                  <Typography.Text style={{ width: 32, flexShrink: 0, color: 'var(--text-secondary)' }}>
                     {label}爻
                   </Typography.Text>
                   <Select
@@ -170,7 +170,7 @@ export default function LiuYao() {
                         value: 0,
                         label: (
                           <Flex align="center" gap={8}>
-                            <Typography.Text style={{ flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+                            <Typography.Text style={{ flexShrink: 0, color: 'var(--text-secondary)' }}>
                               少阴
                             </Typography.Text>
                             <YaoDisplay type={0} />
@@ -181,7 +181,7 @@ export default function LiuYao() {
                         value: 1,
                         label: (
                           <Flex align="center" gap={8}>
-                            <Typography.Text style={{ flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+                            <Typography.Text style={{ flexShrink: 0, color: 'var(--text-secondary)' }}>
                               少阳
                             </Typography.Text>
                             <YaoDisplay type={1} />
@@ -192,7 +192,7 @@ export default function LiuYao() {
                         value: 2,
                         label: (
                           <Flex align="center" gap={8}>
-                            <Typography.Text style={{ flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+                            <Typography.Text style={{ flexShrink: 0, color: 'var(--text-secondary)' }}>
                               老阴
                             </Typography.Text>
                             <YaoDisplay type={2} />
@@ -203,7 +203,7 @@ export default function LiuYao() {
                         value: 3,
                         label: (
                           <Flex align="center" gap={8}>
-                            <Typography.Text style={{ flexShrink: 0, color: 'rgba(46, 46, 51, 0.6)' }}>
+                            <Typography.Text style={{ flexShrink: 0, color: 'var(--text-secondary)' }}>
                               老阳
                             </Typography.Text>
                             <YaoDisplay type={3} />
@@ -224,15 +224,15 @@ export default function LiuYao() {
       label: <span><ThunderboltOutlined /> 自动起卦</span>,
       children: (
         <div style={{ marginTop: 16 }}>
-          <Typography.Paragraph style={{ marginBottom: 16, color: 'rgba(46, 46, 51, 0.6)' }}>
+          <Typography.Paragraph style={{ marginBottom: 16, color: 'var(--text-secondary)' }}>
             以当前时间为种子自动生成卦象，心诚则灵。
           </Typography.Paragraph>
-          <div style={{ borderRadius: 8, padding: 24, textAlign: 'center', backgroundColor: 'rgba(46, 46, 51, 0.05)' }}>
+          <div style={{ borderRadius: 8, padding: 24, textAlign: 'center', border: '1px solid var(--border)' }}>
             <ThunderboltOutlined style={{ fontSize: 24, margin: '0 auto 12px', display: 'block', color: '#7bc3db' }} />
-            <Typography.Text style={{ display: 'block', color: 'rgba(46, 46, 51, 0.7)' }}>
+            <Typography.Text style={{ display: 'block', color: 'var(--text-secondary)' }}>
               点击下方「开始排盘」按钮
             </Typography.Text>
-            <Typography.Text style={{ display: 'block', marginTop: 4, fontSize: 14, color: 'rgba(46, 46, 51, 0.5)' }}>
+            <Typography.Text style={{ display: 'block', marginTop: 4, fontSize: 14, color: 'var(--text-muted)' }}>
               系统将根据当前时间自动起卦
             </Typography.Text>
           </div>
@@ -244,12 +244,12 @@ export default function LiuYao() {
   return (
     <div style={{ padding: 32, maxWidth: 1024, margin: '0 auto' }}>
       <Flex align="center" gap={8} style={{ marginBottom: 24 }}>
-        <Typography.Title level={4} style={{ margin: 0, color: '#2e2e33' }}>
+        <Typography.Title level={4} style={{ margin: 0, color: 'var(--text)' }}>
           六爻起卦
         </Typography.Title>
       </Flex>
 
-      <Card style={{ marginBottom: 24, backgroundColor: '#D4E4DF', borderColor: 'rgba(46, 46, 51, 0.1)' }}>
+      <Card style={{ marginBottom: 24, backgroundColor: 'var(--surface)', borderColor: 'var(--border)' }}>
         <Flex vertical gap={16}>
           <Input.TextArea
             placeholder="请输入所问之事（必填）"

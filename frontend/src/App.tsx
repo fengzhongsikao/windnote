@@ -1,5 +1,5 @@
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom'
-import { Button, Tooltip, Divider } from 'antd'
+import { Button, ConfigProvider, Tooltip, Divider, theme } from 'antd'
 import {
   HomeOutlined,
   UpCircleOutlined,
@@ -9,7 +9,7 @@ import {
   MoonOutlined,
   SunOutlined,
 } from '@ant-design/icons'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Dashboard from './pages/Dashboard'
 import LiuYao from './pages/liuyao/LiuYao'
 import LiuYaoDetail from './pages/liuyao/LiuYaoDetail'
@@ -28,18 +28,14 @@ const navItems = [
   { path: '/settings', label: '设置', icon: SettingOutlined },
 ]
 
-function Sidebar() {
+const themeKey = 'windnote-theme'
+
+function Sidebar({ isDark, onToggleTheme }: { isDark: boolean, onToggleTheme: () => void }) {
   const location = useLocation()
   const navigate = useNavigate()
-  const [isDark, setIsDark] = useState(true)
-
-  const toggleTheme = () => {
-    setIsDark(!isDark)
-    document.documentElement.classList.toggle('dark')
-  }
 
   return (
-    <div style={{ position: 'fixed', left: 0, top: 0, width: 80, height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 0', backgroundColor: 'white', zIndex: 50, borderRight: '1px solid rgba(46, 46, 51, 0.1)' }}>
+    <div style={{ position: 'fixed', left: 0, top: 0, width: 80, height: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '24px 0', backgroundColor: 'var(--surface)', zIndex: 50, borderRight: '1px solid var(--border)' }}>
       <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, width: '100%', padding: '0 8px', alignItems: 'center' }}>
         {navItems.map((item) => {
           const isActive = location.pathname === item.path
@@ -58,24 +54,35 @@ function Sidebar() {
         })}
       </nav>
 
-      <Divider style={{ margin: '16px 0', width: 48, borderColor: 'rgba(46, 46, 51, 0.1)' }} />
+      <Divider style={{ margin: '16px 0', width: 48, borderColor: 'var(--border)' }} />
 
       <div style={{ width: '100%', padding: '0 8px' }}>
-        <Button
-          type="text"
-          style={{ width: '100%' }}
-          onClick={toggleTheme}
-          icon={isDark ? <SunOutlined /> : <MoonOutlined />}
-        />
+        <Tooltip title={isDark ? '白天模式' : '夜晚模式'} placement="right">
+          <Button
+            type="text"
+            style={{ width: '100%' }}
+            onClick={onToggleTheme}
+            icon={isDark ? <SunOutlined /> : <MoonOutlined />}
+            aria-label={isDark ? '切换到白天模式' : '切换到夜晚模式'}
+          />
+        </Tooltip>
       </div>
     </div>
   )
 }
 
 function App() {
+  const [isDark, setIsDark] = useState(() => localStorage.getItem(themeKey) === 'dark')
+
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', isDark)
+    localStorage.setItem(themeKey, isDark ? 'dark' : 'light')
+  }, [isDark])
+
   return (
-    <div style={{ display: 'flex', height: '100%', backgroundColor: 'white' }}>
-      <Sidebar />
+    <ConfigProvider theme={{ algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm }}>
+    <div style={{ display: 'flex', height: '100%', backgroundColor: 'var(--bg)', color: 'var(--text)' }}>
+      <Sidebar isDark={isDark} onToggleTheme={() => setIsDark((value) => !value)} />
       
       <main style={{ flex: 1, marginLeft: 80, overflow: 'auto', position: 'relative' }}>
         <Routes>
@@ -91,6 +98,7 @@ function App() {
         </Routes>
       </main>
     </div>
+    </ConfigProvider>
   )
 }
 
