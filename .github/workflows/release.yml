@@ -1,0 +1,223 @@
+# Push a tag such as v0.2.0 to build installers and publish a GitHub Release.
+# The tag must be vX.Y.Z. That version is written into the packaging metadata
+# for this build only; it is not committed back to the repository.
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # nfpm substitutes these into the Linux package maintainer field.
+  GIT_COMMITTER_NAME: github-actions[bot]
+  GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+
+jobs:
+  package:
+    name: Package (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            target: darwin
+          - os: windows-latest
+            target: windows
+          - os: ubuntu-24.04
+            target: linux
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0
+
+      - name: Install Linux build dependencies
+        if: matrix.target == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential pkg-config libgtk-4-dev libwebkitgtk-6.0-dev libx11-dev
+
+      - name: Install NSIS
+        if: matrix.target == 'windows'
+        shell: pwsh
+        run: |
+          choco install nsis --yes --no-progress
+          Add-Content $env:GITHUB_PATH "C:\Program Files (x86)\NSIS"
+
+      - name: Resolve version
+        shell: bash
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            VERSION="${GITHUB_REF_NAME#v}"
+          else
+            VERSION="0.0.0"
+          fi
+          echo "APP_VERSION=${VERSION}" >> "${GITHUB_ENV}"
+          echo "Resolved version: ${VERSION}"
+
+      - name: Stamp version
+        shell: bash
+        run: |
+          if command -v python3 >/dev/null 2>&1; then
+            PY=python3
+          else
+            PY=python
+          fi
+          "$PY" - <<'PY'
+          import os, re
+          from pathlib import Path
+
+          version = os.environ["APP_VERSION"]
+          if not re.fullmatch(r"\d+\.\d+\.\d+", version):
+              raise SystemExit(
+                  f"version must be X.Y.Z (tag vX.Y.Z). Got {version!r}. "
+                  "NSIS needs a three-part numeric version."
+              )
+
+          def sub(path, pattern, repl, count=0):
+              file = Path(path)
+              text = file.read_text()
+              new, n = re.subn(pattern, repl, text, count=count, flags=re.M)
+              if n == 0:
+                  raise SystemExit(f"version pattern not found in {path}")
+              file.write_text(new)
+              print(f"{path}: {n} replacement(s)")
+
+          sub(
+              "build/config.yml",
+              r'^(  version:\s*)".*"',
+              rf'\1"{version}"',
+              count=1,
+          )
+          sub(
+              "build/windows/info.json",
+              r'("(?:file_version|ProductVersion)":\s*)"[^"]*"',
+              rf'\1"{version}"',
+          )
+          sub(
+              "build/windows/nsis/wails_tools.nsh",
+              r'(!define INFO_PRODUCTVERSION ")[^"]+(")',
+              rf'\g<1>{version}\2',
+              count=1,
+          )
+          sub(
+              "build/darwin/Info.plist",
+              r'(<key>CFBundle(?:ShortVersionString|Version)</key>\s*<string>)[^<]+(</string>)',
+              rf'\g<1>{version}\2',
+          )
+          sub(
+              "build/linux/nfpm/nfpm.yaml",
+              r'^(version:\s*)".*"',
+              rf'\1"{version}"',
+              count=1,
+          )
+          sub(
+              "zhanbu/app.go",
+              r'(func \(a \*App\) GetAppVersion\(\) string \{\n\treturn ")[^"]+(")',
+              rf'\g<1>{version}\2',
+              count=1,
+          )
+          PY
+
+      - name: Package
+        shell: bash
+        env:
+          GOARCH: ${{ runner.arch == 'ARM64' && 'arm64' || 'amd64' }}
+        run: |
+          set -euo pipefail
+          case "${{ matrix.target }}" in
+            darwin)
+              wails3 task darwin:package:dmg
+              ;;
+            windows)
+              wails3 task windows:package
+              ;;
+            linux)
+              wails3 task linux:create:deb
+              ;;
+          esac
+
+      - name: Collect installer
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          mkdir -p dist
+          version="${APP_VERSION}"
+          case "${{ matrix.target }}" in
+            darwin)
+              arch="$(uname -m)"
+              files=(bin/*.dmg)
+              dest="dist/windnote-${version}-macos-${arch}.dmg"
+              ;;
+            windows)
+              files=(bin/*installer.exe)
+              dest="dist/windnote-${version}-windows-amd64-setup.exe"
+              ;;
+            linux)
+              files=(bin/*.deb)
+              dest="dist/windnote-${version}-linux-amd64.deb"
+              ;;
+          esac
+          if [ "${#files[@]}" -eq 0 ]; then
+            echo "packaging produced no installer in bin/" >&2
+            ls -la bin >&2 || true
+            exit 1
+          fi
+          cp "${files[0]}" "${dest}"
+          ls -lh dist
+
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: windnote-${{ matrix.target }}
+          path: dist/*
+          if-no-files-found: error
+
+  release:
+    name: Publish GitHub Release
+    needs: package
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download installers
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - name: Publish
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: artifacts/**/*
