@@ -55,14 +55,17 @@ jobs:
           go-version-file: go.mod
           cache: true
 
-      - name: Install Wails
-        run: go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0
-
+      # The Wails CLI and the app both compile Linux CGO against gtk4 and
+      # webkitgtk-6.0. These packages must be present before `go install`.
       - name: Install Linux build dependencies
         if: matrix.target == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y build-essential pkg-config libgtk-4-dev libwebkitgtk-6.0-dev libx11-dev
+          pkg-config --modversion gtk4 webkitgtk-6.0
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v3/cmd/wails3@v3.0.0
 
       - name: Install NSIS
         if: matrix.target == 'windows'
